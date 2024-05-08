@@ -1,0 +1,87 @@
+name: 'Terraform plan Workflow'
+
+on:
+  workflow_call:
+    inputs:
+      config_directory:
+        required: true
+        type: string
+      terraform_version:
+        required: true
+        type: string
+        default: 1.8.2
+      terraform_wrapper:
+        required: true
+        type: boolean
+        default: false
+
+    secrets:
+      azure_tenant_id:
+        required: true
+      azure_subscription_id:
+        required: true
+      azure_client_id:
+        required: true
+      azure_client_secret:
+        required: true
+      azure_backend_resource_group:
+        required: true
+      azure_backend_storage_account:
+        required: true
+      azure_backend_storage_container:
+        required: true
+      azure_backend_storage_key:
+        required: true
+      github_token:
+        required: true
+      github_owner:
+        required: true
+
+
+
+jobs:
+  terraform_plan:
+    runs-on: ubuntu-latest
+    name: Plan Terraform Configuration
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: ${{ inputs.terraform_wrapper }}
+
+      - name: Login to Azure CLI
+        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+
+      - name: Terraform Init
+        id: init
+        working-directory: ${{ secrets.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
+            -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
+            -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
+            -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform plan -no-color | tee plan_output.tfplan
+
+      - name: Comment Plan Output
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github_token }}
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/plan_output.tfplan', 'utf8');
+            const output = `Terraform Plan Output:\n\`\`\`\n${planOutput}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner:

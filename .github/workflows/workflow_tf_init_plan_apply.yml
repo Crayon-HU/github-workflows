@@ -107,23 +107,46 @@ jobs:
   terraform_plan:
     runs-on: ubuntu-latest
     name: Plan Terraform Configuration
-    env:
-      #Azure
-      ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
-      ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
-      ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
-      ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
-      ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
-      #S3
-      AWS_REGION: ${{ inputs.aws_region }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-      #GitHub
-      GITHUB_TOKEN: ${{ secrets.github_pat }}
-      GITHUB_OWNER: ${{ inputs.github_owner }}
+    # env:
+    #   #Azure
+    #   ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
+    #   ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
+    #   ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
+    #   ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+    #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
+    #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
+    #   #S3
+    #   AWS_REGION: ${{ inputs.aws_region }}
+    #   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+    #   #GitHub
+    #   GITHUB_TOKEN: ${{ secrets.github_pat }}
+    #   GITHUB_OWNER: ${{ inputs.github_owner }}
 
     steps:
+      - name: Set Azure environment variables
+        if: inputs.backend_type == 'azure'
+        run: |
+          echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
+          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
+          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
+
+      - name: Set AWS environment variables
+        if: inputs.backend_type == 's3'
+        run: |
+          echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
+   
+      - name: Set GitHub environment variables
+        if: inputs.github_owner != ''
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
+          echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -207,17 +230,46 @@ jobs:
     needs: terraform_plan
     runs-on: ubuntu-latest
     name: Apply Terraform Configuration
-    env:
-      ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
-      ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
-      ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
-      ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
-      ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
-      GITHUB_TOKEN: ${{ secrets.github_pat }}
-      GITHUB_OWNER: ${{ inputs.github_owner }}
+    # env:
+    #   #Azure
+    #   ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
+    #   ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
+    #   ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
+    #   ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+    #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
+    #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
+    #   #S3
+    #   AWS_REGION: ${{ inputs.aws_region }}
+    #   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+    #   #GitHub
+    #   GITHUB_TOKEN: ${{ secrets.github_pat }}
+    #   GITHUB_OWNER: ${{ inputs.github_owner }}
 
     steps:
+      - name: Set Azure environment variables
+        if: inputs.backend_type == 'azure'
+        run: |
+          echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
+          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
+          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
+
+      - name: Set AWS environment variables
+        if: inputs.backend_type == 's3'
+        run: |
+          echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
+   
+      - name: Set GitHub environment variables
+        if: inputs.github_owner != ''
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
+          echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 

@@ -51,6 +51,20 @@ on:
         type: boolean
         default: true
 
+      #Oracle Cloud
+      oci_tenancy:
+        required: false
+        type: string
+      oci_user:
+        required: false
+        type: string
+      oci_key:
+        required: false
+        type: string
+      oci_fingerprint:
+        required: false
+        type: string
+
       #S3 Backend
       aws_region:
         required: false
@@ -110,15 +124,7 @@ on:
       azure_backend_storage_key:
         required: false
 
-      #Oracle Cloud
-      oci_tenancy:
-        required: false
-      oci_user:
-        required: false
-      oci_key:
-        required: false
-      oci_fingerprint:
-        required: false
+      
 
       #S3 Backend
       aws_access_key:
@@ -144,10 +150,10 @@ jobs:
     #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
     #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
     #   #Oracle Cloud
-      TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
-      TF_VAR_USER_OCID: ${{ secrets.oci_user }}
-      TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
-      TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
+      TF_VAR_TENANCY_OCID: ${{ inputs.oci_tenancy }}
+      TF_VAR_USER_OCID: ${{ inputs.oci_user }}
+      TF_VAR_PRIVATE_KEY: ${{ inputs.oci_key }}
+      TF_VAR_FINGERPRINT: ${{ inputs.oci_fingerprint }}
     #   #S3 Backend
     #   AWS_REGION: ${{ inputs.aws_region }}
     #   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}

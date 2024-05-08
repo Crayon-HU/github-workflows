@@ -148,10 +148,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan
-          path: ${{ github.workspace }}/${{ inputs.config_directory }}
+          path: ${{ inputs.config_directory }}
 
       - name: Display structure of downloaded files
-        run: ls -R ${{ github.workspace }}/${{ inputs.config_directory }}
+        run: ls -R ${{ inputs.config_directory }}
 
       - name: Terraform Init
         id: init

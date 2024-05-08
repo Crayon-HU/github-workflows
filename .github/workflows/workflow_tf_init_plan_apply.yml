@@ -231,7 +231,6 @@ jobs:
         run: |
           terraform init \
             -backend-config="region=${{ inputs.aws_region }}" \
-            -backend-config="key=${{ inputs.aws_key }}" \
             -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
             -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
             -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \

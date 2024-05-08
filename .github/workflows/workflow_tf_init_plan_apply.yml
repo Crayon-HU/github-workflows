@@ -92,11 +92,11 @@ jobs:
       - name: Convert Plan to JSON  
         id: plan_to_json  
         working-directory: ${{ inputs.config_directory }}  
-        run: |  
+        run: |
           terraform show -json plan_output.tfplan > plan_output.json  
     
       - name: Upload Plan JSON  
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan  
           path: ${{ inputs.config_directory }}/plan_output.json 
@@ -148,7 +148,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfplan
-          path: ${{ inputs.config_directory }}
+          path: ${{ github.workspace }}/${{ inputs.config_directory }}
 
       - name: Terraform Init
         id: init

@@ -97,4 +97,7 @@ jobs:
             const output = `Terraform Plan Output:\n\`\`\`\n${planOutput}\n\`\`\``;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner:
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

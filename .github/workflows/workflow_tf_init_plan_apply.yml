@@ -175,4 +175,4 @@ jobs:
         working-directory: ${{ inputs.config_directory }}
         # continue-on-error: true
         run: |
-          terraform apply -auto-approve "plan_output.json"
+          terraform apply -auto-approve "plan_output.tfplan"

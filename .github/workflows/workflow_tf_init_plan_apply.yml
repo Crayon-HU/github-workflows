@@ -244,7 +244,7 @@ jobs:
             -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
             -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
             -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
-            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}" \
+            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
 
       - name: Terraform Plan
         id: plan

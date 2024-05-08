@@ -95,11 +95,17 @@ jobs:
         run: |
           terraform show -json plan_output.tfplan > plan_output.json  
     
-      - name: Upload Plan JSON  
+      - name: Upload Plan JSON
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan  
-          path: ${{ inputs.config_directory }}/plan_output.json 
+          name: tfplan-json
+          path: ${{ inputs.config_directory }}/plan_output.json
+    
+      - name: Upload Plan File
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-file
+          path: ${{ inputs.config_directory }}/plan_output.tfplan
 
       - name: Comment Plan Output
         if: success()
@@ -144,14 +150,15 @@ jobs:
       # - name: Login to Azure CLI
       #   run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
-      - name: Download Plan JSON
+      - name: Download Plan File
         uses: actions/download-artifact@v4
         with:
-          name: tfplan
+          name: tfplan-file
           path: ${{ inputs.config_directory }}
 
-      - name: Display structure of downloaded files
-        run: ls -R ${{ inputs.config_directory }}
+      - name: Verify Downloaded Plan File
+        working-directory: ${{ inputs.config_directory }}
+        run: ls -la
 
       - name: Terraform Init
         id: init

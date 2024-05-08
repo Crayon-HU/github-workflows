@@ -125,10 +125,6 @@ on:
         required: false
       aws_secret_key:
         required: false
-      aws_s3_bucket:
-        required: false
-      aws_s3_endpoint:
-        required: false
 
       #GitHub PAT
       github_pat:

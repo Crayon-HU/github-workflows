@@ -7,11 +7,11 @@ on:
         required: true
         type: string
       terraform_version:
-        required: true
+        required: false
         type: string
         default: 1.8.2
       terraform_wrapper:
-        required: true
+        required: false
         type: boolean
         default: false
 

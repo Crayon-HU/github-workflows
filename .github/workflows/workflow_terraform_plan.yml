@@ -59,7 +59,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        working-directory: ${{ secrets.config_directory }}
+        working-directory: ${{ inputs.config_directory }}
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \

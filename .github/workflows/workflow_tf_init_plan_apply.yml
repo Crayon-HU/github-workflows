@@ -134,15 +134,21 @@ jobs:
   terraform_plan:
     runs-on: ubuntu-latest
     name: Plan Terraform Configuration
-    # env:
+    env:
     #   #Azure
     #   ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
     #   ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
     #   ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
     #   ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+    #   #Azure Backend
     #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
     #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
-    #   #S3
+    #   #Oracle Cloud
+      TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
+      TF_VAR_USER_OCID: ${{ secrets.oci_user }}
+      TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
+      TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
+    #   #S3 Backend
     #   AWS_REGION: ${{ inputs.aws_region }}
     #   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
     #   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
@@ -157,7 +163,7 @@ jobs:
           echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
           echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
 
-      - name: Set Azure backend environment variables
+      - name: Set Azure environment variables
         if: inputs.backend_type == 'azure' || inputs.provider_azurerm == true
         run: |
           echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
@@ -165,13 +171,13 @@ jobs:
           echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
 
-      - name: Set Oracle Cloud environment variables
-        if: inputs.provider_oci == true
-        run: |
-          echo "TF_VAR_TENANCY_OCID=${{ secrets.oci_tenancy }}" >> $GITHUB_ENV
-          echo "TF_VAR_USER_OCID=${{ secrets.oci_user }}" >> $GITHUB_ENV
-          echo "TF_VAR_PRIVATE_KEY=${{ secrets.oci_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_FINGERPRINT=${{ secrets.oci_fingerprint }}" >> $GITHUB_ENV
+      # - name: Set Oracle Cloud environment variables
+      #   if: inputs.provider_oci == true
+      #   run: |
+      #     echo "TF_VAR_TENANCY_OCID=${{ secrets.oci_tenancy }}" >> $GITHUB_ENV
+      #     echo "TF_VAR_USER_OCID=${{ secrets.oci_user }}" >> $GITHUB_ENV
+      #     echo "TF_VAR_PRIVATE_KEY=${{ secrets.oci_key }}" >> $GITHUB_ENV
+      #     echo "TF_VAR_FINGERPRINT=${{ secrets.oci_fingerprint }}" >> $GITHUB_ENV
 
       - name: Set S3 backend environment variables
         if: inputs.backend_type == 's3'

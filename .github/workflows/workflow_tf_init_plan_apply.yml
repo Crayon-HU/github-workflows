@@ -3,11 +3,43 @@ name: 'Terraform init - plan - apply workflow'
 on:
   workflow_call:
     inputs:
-      #Backend Type
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+
+      #Terraform Backend Type
       backend_type:
         required: true
         type: string
         description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+
+      #Terraform Setup
+      terraform_version:
+        required: false
+        type: string
+        default: 1.8.2
+
+      terraform_wrapper:
+        required: false
+        type: boolean
+        default: false
+
+      #Terraform Providers
+      provider_azurerm:
+        required: false
+        type: boolean
+        default: false
+
+      provider_oci:
+        required: false
+        type: boolean
+        default: false
+
+      provider_github:
+        required: false
+        type: boolean
+        default: false
 
       #Azure Backend
       azure_backend_snapshot:
@@ -51,21 +83,6 @@ on:
         required: false
         type: boolean
         default: true
-      
-      #Terraform Configuration
-      config_directory:
-        required: true
-        type: string
-
-      #Terraform Setup
-      terraform_version:
-        required: false
-        type: string
-        default: 1.8.2
-      terraform_wrapper:
-        required: false
-        type: boolean
-        default: false
 
       #GitHub Owner
       github_owner:
@@ -91,6 +108,16 @@ on:
       azure_backend_storage_container:
         required: false
       azure_backend_storage_key:
+        required: false
+
+      #Oracle Cloud
+      oci_tenancy:
+        required: false
+      oci_user:
+        required: false
+      oci_key:
+        required: false
+      oci_fingerprint:
         required: false
 
       #S3 Backend
@@ -124,23 +151,35 @@ jobs:
     #   GITHUB_OWNER: ${{ inputs.github_owner }}
 
     steps:
-      - name: Set Azure environment variables
+      - name: Set Azure backend environment variables
         if: inputs.backend_type == 'azure'
+        run: |
+          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
+          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
+
+      - name: Set Azure backend environment variables
+        if: inputs.backend_type == 'azure' || inputs.provider_azurerm == true
         run: |
           echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
           echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
-          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
-          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
 
-      - name: Set AWS environment variables
+      - name: Set Oracle Cloud environment variables
+        if: inputs.provider_oci == true
+        run: |
+          echo "TF_VAR_TENANCY_OCID=${{ secrets.oci_tenancy }}" >> $GITHUB_ENV
+          echo "TF_VAR_USER_OCID=${{ secrets.oci_user }}" >> $GITHUB_ENV
+          echo "TF_VAR_PRIVATE_KEY=${{ secrets.oci_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_FINGERPRINT=${{ secrets.oci_fingerprint }}" >> $GITHUB_ENV
+
+      - name: Set S3 backend environment variables
         if: inputs.backend_type == 's3'
         run: |
           echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
-   
+
       - name: Set GitHub environment variables
         if: inputs.github_owner != ''
         run: |

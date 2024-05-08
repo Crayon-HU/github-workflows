@@ -3,6 +3,14 @@ name: 'Terraform plan Workflow'
 on:
   workflow_call:
     inputs:
+      azure_backend_snapshot:
+        required: false
+        type: boolean
+        default: true
+      azure_backend_use_azuread:
+        required: false
+        type: boolean
+        default: true
       config_directory:
         required: true
         type: string
@@ -37,8 +45,6 @@ on:
       github_owner:
         required: true
 
-
-
 jobs:
   terraform_plan:
     runs-on: ubuntu-latest
@@ -48,6 +54,8 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
       ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
       ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+      ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
+      ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
 
     steps:
       - name: Checkout Repository

@@ -70,8 +70,8 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
           terraform_wrapper: ${{ inputs.terraform_wrapper }}
 
-      - name: Login to Azure CLI
-        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+      # - name: Login to Azure CLI
+      #   run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
       - name: Terraform Init
         id: init
@@ -141,14 +141,17 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
           terraform_wrapper: ${{ inputs.terraform_wrapper }}
 
-      - name: Login to Azure CLI
-        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+      # - name: Login to Azure CLI
+      #   run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
       - name: Download Plan JSON
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: ${{ github.workspace }}/${{ inputs.config_directory }}
+
+      - name: Display structure of downloaded files
+        run: ls -R ${{ github.workspace }}/${{ inputs.config_directory }}
 
       - name: Terraform Init
         id: init

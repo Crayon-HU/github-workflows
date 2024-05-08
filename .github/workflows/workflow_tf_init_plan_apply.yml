@@ -199,8 +199,6 @@ jobs:
           echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_S3_BUCKET=${{ secrets.aws_s3_bucket }}" >> $GITHUB_ENV
-          echo "TF_VAR_S3_ENDPOINT=${{ secrets.aws_s3_endpoint }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables
         if: inputs.github_owner != ''

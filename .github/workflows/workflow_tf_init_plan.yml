@@ -1,4 +1,4 @@
-name: 'Terraform apply workflow'
+name: 'Terraform init - plan workflow'
 
 on:
   workflow_call:
@@ -47,7 +47,7 @@ on:
         required: true
 
 jobs:
-  terraform_apply:
+  terraform_plan:
     runs-on: ubuntu-latest
     name: Plan Terraform Configuration
     env:
@@ -83,36 +83,24 @@ jobs:
             -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
             -backend-config="key=${{ secrets.azure_backend_storage_key }}"
 
-      - name: Terraform Apply
-        id: apply
+      - name: Terraform Plan
+        id: plan
         working-directory: ${{ inputs.config_directory }}
-        continue-on-error: true
         run: |
-          terraform apply -auto-approve -json | tee apply_output.json
+          terraform plan -no-color | tee plan_output.tfplan
 
-      # - name: Comment Apply Summary
-      #   if: always()
-      #   uses: actions/github-script@v7
-      #   with:
-      #     github-token: ${{ secrets.github_pat }}
-      #     script: |
-      #       const fs = require('fs');
-      #       const applyOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/apply_output.json', 'utf8');
-      #       let summary = '';
-      #       try {
-      #         const applyResult = JSON.parse(applyOutput);
-      #         // You may need to write your own logic to create a summary from the JSON result
-      #         // Below is just an example and may not reflect the actual structure of Terraform's JSON output
-      #         summary = `Terraform Apply Summary:\n`;
-      #         summary += `Resources added: ${applyResult.resource_changes.filter(r => r.change.actions.includes('create')).length}\n`;
-      #         summary += `Resources changed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('update')).length}\n`;
-      #         summary += `Resources destroyed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('delete')).length}\n`;
-      #       } catch (error) {
-      #         summary = `Error parsing Terraform apply output: ${error.message}`;
-      #       }
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: summary
-      #       });
+      - name: Comment Plan Output
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github_pat }}
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/plan_output.tfplan', 'utf8');
+            const output = `Terraform Plan Output:\n\`\`\`\n${planOutput}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

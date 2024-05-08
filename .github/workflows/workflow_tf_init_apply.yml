@@ -1,0 +1,118 @@
+name: 'Terraform init - apply workflow'
+
+on:
+  workflow_call:
+    inputs:
+      azure_backend_snapshot:
+        required: false
+        type: boolean
+        default: true
+      azure_backend_use_azuread:
+        required: false
+        type: boolean
+        default: true
+      config_directory:
+        required: true
+        type: string
+      terraform_version:
+        required: false
+        type: string
+        default: 1.8.2
+      terraform_wrapper:
+        required: false
+        type: boolean
+        default: false
+      github_owner:
+        required: true
+        type: string
+
+    secrets:
+      azure_tenant_id:
+        required: true
+      azure_subscription_id:
+        required: true
+      azure_client_id:
+        required: true
+      azure_client_secret:
+        required: true
+      azure_backend_resource_group:
+        required: true
+      azure_backend_storage_account:
+        required: true
+      azure_backend_storage_container:
+        required: true
+      azure_backend_storage_key:
+        required: true
+      github_pat:
+        required: true
+
+jobs:
+  terraform_apply:
+    runs-on: ubuntu-latest
+    name: Plan Terraform Configuration
+    env:
+      ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
+      ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
+      ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+      ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
+      ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
+      GITHUB_TOKEN: ${{ secrets.github_pat }}
+      GITHUB_OWNER: ${{ inputs.github_owner }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: ${{ inputs.terraform_wrapper }}
+
+      - name: Login to Azure CLI
+        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+
+      - name: Terraform Init
+        id: init
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
+            -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
+            -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
+            -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      - name: Terraform Apply
+        id: apply
+        working-directory: ${{ inputs.config_directory }}
+        continue-on-error: true
+        run: |
+          terraform apply -auto-approve -json | tee apply_output.json
+
+      # - name: Comment Apply Summary
+      #   if: always()
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.github_pat }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const applyOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/apply_output.json', 'utf8');
+      #       let summary = '';
+      #       try {
+      #         const applyResult = JSON.parse(applyOutput);
+      #         // You may need to write your own logic to create a summary from the JSON result
+      #         // Below is just an example and may not reflect the actual structure of Terraform's JSON output
+      #         summary = `Terraform Apply Summary:\n`;
+      #         summary += `Resources added: ${applyResult.resource_changes.filter(r => r.change.actions.includes('create')).length}\n`;
+      #         summary += `Resources changed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('update')).length}\n`;
+      #         summary += `Resources destroyed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('delete')).length}\n`;
+      #       } catch (error) {
+      #         summary = `Error parsing Terraform apply output: ${error.message}`;
+      #       }
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: summary
+      #       });

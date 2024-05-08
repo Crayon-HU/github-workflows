@@ -97,7 +97,7 @@ jobs:
     
       - name: Upload Plan JSON  
         uses: actions/upload-artifact@v3
-        with:  
+        with:
           name: tfplan  
           path: ${{ inputs.config_directory }}/plan_output.json 
 
@@ -149,7 +149,7 @@ jobs:
         with:
           name: tfplan
           path: ${{ inputs.config_directory }}
-        
+
       - name: Terraform Init
         id: init
         working-directory: ${{ inputs.config_directory }}
@@ -165,4 +165,4 @@ jobs:
         working-directory: ${{ inputs.config_directory }}
         # continue-on-error: true
         run: |
-          terraform apply -auto-approve "plan_output.tfplan"
+          terraform apply -auto-approve "plan_output.json"

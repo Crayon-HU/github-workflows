@@ -25,7 +25,7 @@ on:
         type: string
         default: 'eu-frankfurt-1'
       aws_key:
-        required: true
+        required: false
         type: string
       aws_backend_skip_credentials_validation:
         required: false
@@ -69,39 +69,39 @@ on:
 
       #GitHub Owner
       github_owner:
-        required: true
+        required: false
         type: string
 
     secrets:
       #Azure
       azure_tenant_id:
-        required: true
+        required: false
       azure_subscription_id:
-        required: true
+        required: false
       azure_client_id:
-        required: true
+        required: false
       azure_client_secret:
-        required: true
+        required: false
 
       #Azure Backend
       azure_backend_resource_group:
-        required: true
+        required: false
       azure_backend_storage_account:
-        required: true
+        required: false
       azure_backend_storage_container:
-        required: true
+        required: false
       azure_backend_storage_key:
-        required: true
+        required: false
 
       #S3 Backend
       aws_access_key:
-        required: true
+        required: false
       aws_secret_key:
-        required: true
+        required: false
 
       #GitHub PAT
       github_pat:
-        required: true
+        required: false
 
 jobs:
   terraform_plan:
@@ -133,10 +133,12 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
           terraform_wrapper: ${{ inputs.terraform_wrapper }}
 
-      # - name: Login to Azure CLI
-      #   run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+      - name: Login to Azure CLI
+        if: inputs.backend_type == 'azure'
+        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
       - name: Terraform Init with Azure backend
+        if: inputs.backend_type == 'azure'
         id: init_azure_backend
         working-directory: ${{ inputs.config_directory }}
         run: |
@@ -145,8 +147,9 @@ jobs:
             -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
             -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
             -backend-config="key=${{ secrets.azure_backend_storage_key }}"
-      
+
       - name: Terraform Init with S3 backend
+        if: inputs.backend_type == 's3'
         id: init_s3_backend
         working-directory: ${{ inputs.config_directory }}
         run: |
@@ -224,8 +227,9 @@ jobs:
           terraform_version: ${{ inputs.terraform_version }}
           terraform_wrapper: ${{ inputs.terraform_wrapper }}
 
-      # - name: Login to Azure CLI
-      #   run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+      - name: Login to Azure CLI
+        if: inputs.backend_type == 'azure'
+        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
       - name: Download Plan File
         uses: actions/download-artifact@v4
@@ -237,8 +241,9 @@ jobs:
         working-directory: ${{ inputs.config_directory }}
         run: ls -la
 
-      - name: Terraform Init
-        id: init
+      - name: Terraform Init with Azure backend
+        if: inputs.backend_type == 'azure'
+        id: init_azure_backend
         working-directory: ${{ inputs.config_directory }}
         run: |
           terraform init \
@@ -246,6 +251,21 @@ jobs:
             -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
             -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
             -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      - name: Terraform Init with S3 backend
+        if: inputs.backend_type == 's3'
+        id: init_s3_backend
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="region=${{ inputs.aws_region }}" \
+            -backend-config="key=${{ inputs.aws_key }}" \
+            -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
+            -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
+            -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
+            -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
+            -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
+            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}" \
 
       - name: Terraform Apply
         id: apply

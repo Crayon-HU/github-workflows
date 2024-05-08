@@ -69,7 +69,7 @@ on:
       aws_region:
         required: false
         type: string
-        default: 'eu-frankfurt-1'
+        default: 'eu-amsterdam-1'
       aws_key:
         required: false
         type: string

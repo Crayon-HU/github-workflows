@@ -19,7 +19,7 @@ on:
         type: string
         default: 1.8.2
       terraform_wrapper:
-        required: true
+        required: false
         type: boolean
         default: false
       github_owner:

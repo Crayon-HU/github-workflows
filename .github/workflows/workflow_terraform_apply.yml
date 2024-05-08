@@ -90,29 +90,29 @@ jobs:
         run: |
           terraform apply -auto-approve -json | tee apply_output.json
 
-      - name: Comment Apply Summary
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.github_pat }}
-          script: |
-            const fs = require('fs');
-            const applyOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/apply_output.json', 'utf8');
-            let summary = '';
-            try {
-              const applyResult = JSON.parse(applyOutput);
-              // You may need to write your own logic to create a summary from the JSON result
-              // Below is just an example and may not reflect the actual structure of Terraform's JSON output
-              summary = `Terraform Apply Summary:\n`;
-              summary += `Resources added: ${applyResult.resource_changes.filter(r => r.change.actions.includes('create')).length}\n`;
-              summary += `Resources changed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('update')).length}\n`;
-              summary += `Resources destroyed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('delete')).length}\n`;
-            } catch (error) {
-              summary = `Error parsing Terraform apply output: ${error.message}`;
-            }
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: summary
-            });
+      # - name: Comment Apply Summary
+      #   if: always()
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.github_pat }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const applyOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/apply_output.json', 'utf8');
+      #       let summary = '';
+      #       try {
+      #         const applyResult = JSON.parse(applyOutput);
+      #         // You may need to write your own logic to create a summary from the JSON result
+      #         // Below is just an example and may not reflect the actual structure of Terraform's JSON output
+      #         summary = `Terraform Apply Summary:\n`;
+      #         summary += `Resources added: ${applyResult.resource_changes.filter(r => r.change.actions.includes('create')).length}\n`;
+      #         summary += `Resources changed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('update')).length}\n`;
+      #         summary += `Resources destroyed: ${applyResult.resource_changes.filter(r => r.change.actions.includes('delete')).length}\n`;
+      #       } catch (error) {
+      #         summary = `Error parsing Terraform apply output: ${error.message}`;
+      #       }
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: summary
+      #       });

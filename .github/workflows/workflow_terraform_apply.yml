@@ -19,9 +19,12 @@ on:
         type: string
         default: 1.8.2
       terraform_wrapper:
-        required: false
+        required: true
         type: boolean
         default: false
+      github_owner:
+        required: true
+        type: string
 
     secrets:
       azure_tenant_id:
@@ -42,8 +45,6 @@ on:
         required: true
       github_pat:
         required: true
-      github_owner:
-        required: true
 
 jobs:
   terraform_apply:
@@ -56,6 +57,8 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
       ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
       ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
+      GITHUB_TOKEN: ${{ secrets.github_pat }}
+      GITHUB_OWNER: ${{ inputs.github_owner }}
 
     steps:
       - name: Checkout Repository

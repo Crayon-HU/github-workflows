@@ -273,7 +273,7 @@ jobs:
       - name: Run Checkov Scan
         working-directory: ${{ inputs.config_directory }}
         run: |
-          checkov -f plan_output.json --quiet --repo-root-for-plan-enrichment ${{ github.workspace }}/${{ inputs.config_directory }}
+          checkov -f plan_output.json --quiet --repo-root-for-plan-enrichment ${{ github.workspace }}/${{ inputs.config_directory }} --deep-analysis
 
       # Optional: Upload Checkov Scan results as an artifact
       - name: Upload Checkov Scan Report

@@ -331,22 +331,22 @@ jobs:
         working-directory: ${{ inputs.config_directory }}
         # continue-on-error: true
         run: |
-          output=$(terraform apply -auto-approve "plan_output.tfplan" | tee /dev/tty)
-          apply_output=$(echo "$output" | grep '^Apply')
+          terraform apply -auto-approve "plan_output.tfplan" > apply_output.txt
+          apply_output=$(grep '^Apply' apply_output.txt)
           echo "::set-output name=stdout::$apply_output"
 
       - name: Comment Apply Output
         if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
-        env:
-          APPLY_OUTPUT: ${{ steps.apply.outputs.stdout }}
         with:
           github-token: ${{ secrets.github_pat }}
           script: |
-            const output = `${process.env.APPLY_OUTPUT}`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            });
+            const applyOutput = '${{ steps.apply.outputs.stdout }}';
+            if (applyOutput) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: applyOutput
+              });
+            }

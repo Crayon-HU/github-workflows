@@ -250,18 +250,18 @@ jobs:
         run: |
           terraform plan -no-color -out=plan_output.tfplan | tee plan_output.txt
 
-      - name: Convert Plan to JSON  
-        id: plan_to_json  
-        working-directory: ${{ inputs.config_directory }}  
+      - name: Convert Plan to JSON
+        id: plan_to_json
+        working-directory: ${{ inputs.config_directory }}
         run: |
-          terraform show -json plan_output.tfplan > plan_output.json  
-    
+          terraform show -json plan_output.tfplan > plan_output.json
+
       - name: Upload Plan JSON
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-json
           path: ${{ inputs.config_directory }}/plan_output.json
-    
+
       - name: Upload Plan File
         uses: actions/upload-artifact@v4
         with:

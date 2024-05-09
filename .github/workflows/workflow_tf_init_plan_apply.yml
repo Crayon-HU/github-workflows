@@ -201,7 +201,6 @@ jobs:
       #     echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables
-        if: inputs.github_owner != ''
         run: |
           echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
           echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV

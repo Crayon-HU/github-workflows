@@ -301,10 +301,6 @@ jobs:
           name: tfplan-file
           path: ${{ inputs.config_directory }}
 
-      - name: Verify Downloaded Plan File
-        working-directory: ${{ inputs.config_directory }}
-        run: ls -la
-
       - name: Terraform Init with Azure backend
         if: inputs.backend_type == 'azure'
         id: init_azure_backend

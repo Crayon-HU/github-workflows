@@ -311,6 +311,7 @@ jobs:
     needs: [terraform_plan, checkov_scan]
     runs-on: ubuntu-latest
     name: Apply Terraform Configuration
+    if: ${{ always() }} # This will run even if checkov_scan fails
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
       TF_VAR_USER_OCID: ${{ secrets.oci_user }}

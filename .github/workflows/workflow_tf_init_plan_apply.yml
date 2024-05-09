@@ -14,6 +14,13 @@ on:
         type: string
         description: 'Type of the backend to use. Valid values are "azure" and "s3".'
 
+      #Checkov
+      checkov_scan:
+        required: false
+        type: boolean
+        default: false
+        description: 'Set to true to run Checkov security scan.'
+
       #Terraform Setup
       terraform_version:
         required: false
@@ -131,7 +138,15 @@ on:
         required: false
 
 jobs:
-  #Terraform Plan
+  # $$$$$$$\  $$\                     
+  # $$  __$$\ $$ |                    
+  # $$ |  $$ |$$ | $$$$$$\  $$$$$$$\  
+  # $$$$$$$  |$$ | \____$$\ $$  __$$\ 
+  # $$  ____/ $$ | $$$$$$$ |$$ |  $$ |
+  # $$ |      $$ |$$  __$$ |$$ |  $$ |
+  # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
+  # \__|      \__| \_______|\__|  \__|
+
   terraform_plan:
     runs-on: ubuntu-latest
     name: Plan Terraform Configuration
@@ -251,11 +266,20 @@ jobs:
               body: output
             });
 
-  #Checkov
+  # $$$$$$\  $$\                           $$\                           
+  # $$  __$$\ $$ |                          $$ |                          
+  # $$ /  \__|$$$$$$$\   $$$$$$\   $$$$$$$\ $$ |  $$\  $$$$$$\ $$\    $$\ 
+  # $$ |      $$  __$$\ $$  __$$\ $$  _____|$$ | $$  |$$  __$$\\$$\  $$  |
+  # $$ |      $$ |  $$ |$$$$$$$$ |$$ /      $$$$$$  / $$ /  $$ |\$$\$$  / 
+  # $$ |  $$\ $$ |  $$ |$$   ____|$$ |      $$  _$$<  $$ |  $$ | \$$$  /  
+  # \$$$$$$  |$$ |  $$ |\$$$$$$$\ \$$$$$$$\ $$ | \$$\ \$$$$$$  |  \$  /   
+  #  \______/ \__|  \__| \_______| \_______|\__|  \__| \______/    \_/    
+
   checkov_scan:
     needs: terraform_plan
     runs-on: ubuntu-latest
     name: Checkov Security Scan
+    if: ${{ inputs.run_checkov_scan }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4 
@@ -306,12 +330,23 @@ jobs:
               body: output
             });
 
-  #Terraform Apply
+  # $$$$$$\                      $$\           
+  # $$  __$$\                     $$ |          
+  # $$ /  $$ | $$$$$$\   $$$$$$\  $$ |$$\   $$\ 
+  # $$$$$$$$ |$$  __$$\ $$  __$$\ $$ |$$ |  $$ |
+  # $$  __$$ |$$ /  $$ |$$ /  $$ |$$ |$$ |  $$ |
+  # $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |$$ |  $$ |
+  # $$ |  $$ |$$$$$$$  |$$$$$$$  |$$ |\$$$$$$$ |
+  # \__|  \__|$$  ____/ $$  ____/ \__| \____$$ |
+  #           $$ |      $$ |          $$\   $$ |
+  #           $$ |      $$ |          \$$$$$$  |
+  #           \__|      \__|           \______/ 
+
   terraform_apply:
     needs: [terraform_plan, checkov_scan]
     runs-on: ubuntu-latest
     name: Apply Terraform Configuration
-    if: ${{ always() }} # This will run even if checkov_scan fails
+    if: ${{ always() && (needs.checkov_scan.result == 'success' || !inputs.checkov_scan) }}
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
       TF_VAR_USER_OCID: ${{ secrets.oci_user }}

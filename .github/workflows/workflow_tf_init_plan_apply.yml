@@ -148,27 +148,11 @@ jobs:
   terraform_plan:
     runs-on: ubuntu-latest
     name: Plan Terraform Configuration
-    # env:
-    #   #Azure
-    #   ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
-    #   ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
-    #   ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
-    #   ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
-    #   #Azure Backend
-    #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
-    #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
-    #   #Oracle Cloud
-      # TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
-      # TF_VAR_USER_OCID: ${{ secrets.oci_user }}
-      # TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
-      # TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
-    #   #S3 Backend
-    #  AWS_REGION: ${{ inputs.aws_region }}
-    #  AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-    #  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-    #   #GitHub
-    #   GITHUB_TOKEN: ${{ secrets.github_pat }}
-    #   GITHUB_OWNER: ${{ inputs.github_owner }}
+    env:
+      TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
+      TF_VAR_USER_OCID: ${{ secrets.oci_user }}
+      TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
+      TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
 
     steps:
       - name: Set Azure backend environment variables
@@ -184,14 +168,6 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
-
-      - name: Set Oracle Cloud environment variables
-        if: inputs.provider_oci == true
-        run: |
-          echo "TF_VAR_TENANCY_OCID=${{ secrets.oci_tenancy }}" >> $GITHUB_ENV
-          echo "TF_VAR_USER_OCID=${{ secrets.oci_user }}" >> $GITHUB_ENV
-          echo "TF_VAR_PRIVATE_KEY=${{ secrets.oci_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_FINGERPRINT=${{ secrets.oci_fingerprint }}" >> $GITHUB_ENV
 
       - name: Set S3 backend environment variables
         if: inputs.backend_type == 's3'
@@ -287,42 +263,35 @@ jobs:
     needs: terraform_plan
     runs-on: ubuntu-latest
     name: Apply Terraform Configuration
-    # env:
-    #   #Azure
-    #   ARM_TENANT_ID: ${{ secrets.azure_tenant_id }}
-    #   ARM_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
-    #   ARM_CLIENT_ID: ${{ secrets.azure_client_id }}
-    #   ARM_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
-    #   ARM_SNAPSHOT: ${{ inputs.azure_backend_snapshot}}
-    #   ARM_USE_AZUREAD: ${{ inputs.azure_backend_use_azuread }}
-    #   #S3
-    #   AWS_REGION: ${{ inputs.aws_region }}
-    #   AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-    #   #GitHub
-    #   GITHUB_TOKEN: ${{ secrets.github_pat }}
-    #   GITHUB_OWNER: ${{ inputs.github_owner }}
+    env:
+      TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
+      TF_VAR_USER_OCID: ${{ secrets.oci_user }}
+      TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
+      TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
 
     steps:
-      - name: Set Azure environment variables
+      - name: Set Azure backend environment variables
         if: inputs.backend_type == 'azure'
+        run: |
+          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
+          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
+
+      - name: Set Azure environment variables
+        if: inputs.backend_type == 'azure' || inputs.provider_azurerm == true
         run: |
           echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
           echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
           echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
-          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
-          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
 
-      - name: Set AWS environment variables
+      - name: Set S3 backend environment variables
         if: inputs.backend_type == 's3'
         run: |
           echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
-   
+
       - name: Set GitHub environment variables
-        if: inputs.github_owner != ''
         run: |
           echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
           echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
@@ -368,13 +337,12 @@ jobs:
         run: |
           terraform init \
             -backend-config="region=${{ inputs.aws_region }}" \
-            -backend-config="key=${{ inputs.aws_key }}" \
             -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
             -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
             -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
             -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
             -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
-            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}" \
+            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
 
       - name: Terraform Apply
         id: apply

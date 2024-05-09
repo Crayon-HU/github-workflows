@@ -51,20 +51,6 @@ on:
         type: boolean
         default: true
 
-      #Oracle Cloud
-      # oci_tenancy:
-      #   required: false
-      #   type: string
-      # oci_user:
-      #   required: false
-      #   type: string
-      # oci_key:
-      #   required: false
-      #   type: string
-      # oci_fingerprint:
-      #   required: false
-      #   type: string
-
       #S3 Backend
       aws_region:
         required: false

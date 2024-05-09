@@ -163,9 +163,9 @@ jobs:
       TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
       TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
     #   #S3 Backend
-      AWS_REGION: ${{ inputs.aws_region }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+    #  AWS_REGION: ${{ inputs.aws_region }}
+    #  AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+    #  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
     #   #GitHub
     #   GITHUB_TOKEN: ${{ secrets.github_pat }}
     #   GITHUB_OWNER: ${{ inputs.github_owner }}
@@ -193,12 +193,12 @@ jobs:
       #     echo "TF_VAR_PRIVATE_KEY=${{ secrets.oci_key }}" >> $GITHUB_ENV
       #     echo "TF_VAR_FINGERPRINT=${{ secrets.oci_fingerprint }}" >> $GITHUB_ENV
 
-      # - name: Set S3 backend environment variables
-      #   if: inputs.backend_type == 's3'
-      #   run: |
-      #     echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
-      #     echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
-      #     echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
+      - name: Set S3 backend environment variables
+        if: inputs.backend_type == 's3'
+        run: |
+          echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables
         run: |

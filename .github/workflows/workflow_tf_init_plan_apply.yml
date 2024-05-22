@@ -297,7 +297,15 @@ jobs:
       - name: Run Checkov Scan
         working-directory: ${{ inputs.config_directory }}
         run: |
-          checkov -f plan_output.json --quiet --repo-root-for-plan-enrichment ${{ inputs.config_directory }} --deep-analysis --output cli --output junitxml --output-file-path console,checkov_report.xml
+          checkov \
+            --file plan_output.json \
+            --quiet \
+            --list \
+            --repo-root-for-plan-enrichment ${{ inputs.config_directory }} \
+            --deep-analysis \
+            --output cli \
+            --output junitxml \
+            --output-file-path console,checkov_report.xml
 
       - name: Eles
         if: always()

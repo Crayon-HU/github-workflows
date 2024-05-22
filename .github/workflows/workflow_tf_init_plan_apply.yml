@@ -347,12 +347,11 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           github_token: ${{ secrets.github_pat }}
-          github_token_actor: SpinnerboT
+          github_token_actor: SpinnerBot
           check_name: Checkov Test Results for ${{ inputs.config_directory }}
           files: ${{ inputs.config_directory }}/checkov_report.xml
           job_summary: true
           report_individual_runs: true
-          search_pull_requests: true
 
   # $$$$$$\                      $$\           
   # $$  __$$\                     $$ |          

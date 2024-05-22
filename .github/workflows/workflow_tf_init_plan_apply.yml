@@ -300,7 +300,6 @@ jobs:
           checkov \
             --file plan_output.json \
             --quiet \
-            --list \
             --repo-root-for-plan-enrichment ${{ inputs.config_directory }} \
             --deep-analysis \
             --output cli \

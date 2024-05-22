@@ -305,7 +305,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkov-report
-          path: ${{ inputs.config_directory }}/checkov_report/
+          path: ${{ inputs.config_directory }}
 
       # Optional: Comment Checkov Scan results on PR
       - name: Comment Checkov Scan Output

@@ -301,6 +301,7 @@ jobs:
 
       - name: ELES
         run: ls -lha ${{ inputs.config_directory }}
+
       # Optional: Upload Checkov Scan results as an artifact
       - name: Upload Checkov Scan Report
         if: always()

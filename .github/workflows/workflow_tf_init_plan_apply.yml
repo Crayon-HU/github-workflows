@@ -280,6 +280,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Checkov Security Scan
     if: ${{ inputs.checkov_scan }}
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

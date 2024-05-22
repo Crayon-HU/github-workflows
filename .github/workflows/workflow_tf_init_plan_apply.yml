@@ -352,6 +352,7 @@ jobs:
           files: ${{ inputs.config_directory }}/checkov_report.xml
           job_summary: true
           report_individual_runs: true
+          search_pull_requests: true
 
   # $$$$$$\                      $$\           
   # $$  __$$\                     $$ |          

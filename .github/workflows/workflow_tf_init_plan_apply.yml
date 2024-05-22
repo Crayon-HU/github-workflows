@@ -349,9 +349,10 @@ jobs:
 
       - name: Publish Checkov Test Results
         if: github.event_name == 'pull_request'
-        uses: EnricoMi/publish-unit-test-result-action@v1
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          # github_token: ${{ secrets.github_pat }}
+          github_token: ${{ secrets.github_pat }}
+          github_token_actor: SpinnerboT
           check_name: Checkov Test Results for ${{ inputs.config_directory }}
           files: ${{ inputs.config_directory }}/checkov_report.xml
           job_summary: true

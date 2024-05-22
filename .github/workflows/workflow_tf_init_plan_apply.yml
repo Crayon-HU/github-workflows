@@ -311,7 +311,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkov-report
-          path: ${{ inputs.config_directory }}
+          path: ${{ inputs.config_directory }}/checkov_report.xml
           overwrite: true
 
       # Optional: Comment Checkov Scan results on PR
@@ -322,7 +322,7 @@ jobs:
           github-token: ${{ secrets.github_pat }}
           script: |
             const fs = require('fs');
-            const checkovReportPath = '${{ inputs.config_directory }}';
+            const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
             const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
             const output = `
               <details>

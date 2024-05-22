@@ -93,7 +93,7 @@ on:
 
       #GitHub Owner
       github_owner:
-        required: false
+        required: true
         type: string
 
     secrets:
@@ -135,7 +135,7 @@ on:
 
       #GitHub PAT
       github_pat:
-        required: false
+        required: true
 
 jobs:
   # $$$$$$$\  $$\                     
@@ -279,7 +279,7 @@ jobs:
     needs: terraform_plan
     runs-on: ubuntu-latest
     name: Checkov Security Scan
-    if: ${{ inputs.run_checkov_scan }}
+    if: ${{ inputs.checkov_scan }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4 

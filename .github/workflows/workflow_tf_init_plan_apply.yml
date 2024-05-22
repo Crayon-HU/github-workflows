@@ -300,7 +300,8 @@ jobs:
           checkov -f plan_output.json --quiet --repo-root-for-plan-enrichment ${{ inputs.config_directory }} --deep-analysis --output cli --output junitxml --output-file-path console, ${{ inputs.config_directory }}/checkov_report.xml
 
       - name: ELES
-        run: ls -lha ${{ inputs.config_directory }}
+        run: |
+          ls -lha ${{ inputs.config_directory }}
 
       # Optional: Upload Checkov Scan results as an artifact
       - name: Upload Checkov Scan Report

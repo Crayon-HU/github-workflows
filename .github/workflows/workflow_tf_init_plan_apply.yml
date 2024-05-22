@@ -312,7 +312,6 @@ jobs:
         run: |
           ls -lha
 
-      # Optional: Upload Checkov Scan results as an artifact
       - name: Upload Checkov Scan Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -322,27 +321,36 @@ jobs:
           overwrite: true
 
       # Optional: Comment Checkov Scan results on PR
-      - name: Comment Checkov Scan Output
+      # - name: Comment Checkov Scan Output
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.github_pat }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
+      #       const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
+      #       const output = `
+      #         <details>
+      #         <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
+      #         \n\`\`\`\n${checkovReport}\n\`\`\`
+      #         </details>
+      #       `;
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: output
+      #       });
+
+
+      - name: Publish Checkov Test Results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          github-token: ${{ secrets.github_pat }}
-          script: |
-            const fs = require('fs');
-            const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
-            const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
-            const output = `
-              <details>
-              <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
-              \n\`\`\`\n${checkovReport}\n\`\`\`
-              </details>
-            `;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            });
+          github_token: ${{ secrets.github_pat }}
+          check_name: Checkov Test Results # Optional: Customize the name of the check run
+          files: ${{ inputs.config_directory }}/checkov_report.xml
 
   # $$$$$$\                      $$\           
   # $$  __$$\                     $$ |          

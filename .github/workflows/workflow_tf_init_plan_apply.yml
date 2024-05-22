@@ -320,7 +320,6 @@ jobs:
           path: ${{ inputs.config_directory }}/checkov_report.xml
           overwrite: true
 
-      # Optional: Comment Checkov Scan results on PR
       # - name: Comment Checkov Scan Output
       #   if: github.event_name == 'pull_request'
       #   uses: actions/github-script@v7
@@ -343,14 +342,15 @@ jobs:
       #         body: output
       #       });
 
-
       - name: Publish Checkov Test Results
         if: github.event_name == 'pull_request'
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          github_token: ${{ secrets.github_pat }}
-          check_name: Checkov Test Results # Optional: Customize the name of the check run
+          # github_token: ${{ secrets.github_pat }}
+          check_name: Checkov Test Results for ${{ inputs.config_directory }}
           files: ${{ inputs.config_directory }}/checkov_report.xml
+          job_summary: true
+          report_individual_runs: true
 
   # $$$$$$\                      $$\           
   # $$  __$$\                     $$ |          

@@ -1,0 +1,137 @@
+name: step_checkov_scan
+
+on:
+  workflow_call:
+    inputs:
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+
+      #Checkov
+      checkov_scan:
+        required: false
+        type: boolean
+        default: false
+        description: 'Set to true to run Checkov security scan.'
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+
+    secrets:
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  checkov_scan:
+    # needs: terraform_plan
+    runs-on: ubuntu-latest
+    name: Checkov Security Scan
+    if: ${{ inputs.checkov_scan }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Plan JSON
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-json
+          path: ${{ inputs.config_directory }}
+
+      - name: Install Checkov
+        run: |
+          pip install checkov
+
+      - name: Run Checkov Scan
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          checkov \
+            --file plan_output.json \
+            --repo-root-for-plan-enrichment ${{ inputs.config_directory }} \
+            --deep-analysis \
+            --output cli \
+            --output junitxml \
+            --output-file-path console,checkov_report.xml
+
+      - name: Upload Checkov Scan Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov-report
+          path: ${{ inputs.config_directory }}/checkov_report.xml
+          overwrite: true
+
+      - name: Comment Checkov Scan Output
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github_pat }}
+          script: |
+            const fs = require('fs');
+            const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
+            const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
+            const output = `
+              <details>
+              <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
+              \n\`\`\`\n${checkovReport}\n\`\`\`
+              </details>
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      # - name: Comment Checkov Scan Output
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.github_pat }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const { parseStringPromise } = require('xml2js');
+      #       const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
+      #       const checkovReportXML = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
+
+      #       parseStringPromise(checkovReportXML).then(result => {
+      #         const properties = result.testsuites.testsuite[0].properties[0].property;
+      #         let markdownTable = `
+      #           | Property | Value |
+      #           | --- | --- |
+      #         `;
+      #         properties.forEach(prop => {
+      #           markdownTable += `| ${prop.$.name} | ${prop.$.value} |\n`;
+      #         });
+
+      #         const output = `
+      #           <details>
+      #             <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
+      #             ${markdownTable}
+      #           </details>
+      #         `;
+
+      #         github.rest.issues.createComment({
+      #           issue_number: context.issue.number,
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           body: output
+      #         });
+      #       }).catch(err => {
+      #         console.error('Failed to parse Checkov report XML:', err);
+      #         // Handle error
+      #       });
+
+      # - name: Publish Checkov Test Results
+      #   if: github.event_name == 'pull_request'
+      #   uses: EnricoMi/publish-unit-test-result-action@v2
+      #   with:
+      #     github_token: ${{ secrets.github_pat }}
+      #     github_token_actor: SpinnerBot
+      #     check_name: Checkov Test Results for ${{ inputs.config_directory }}
+      #     files: ${{ inputs.config_directory }}/checkov_report.xml
+      #     job_summary: true
+      #     report_individual_runs: true

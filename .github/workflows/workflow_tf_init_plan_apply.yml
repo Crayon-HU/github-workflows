@@ -1,4 +1,4 @@
-name: 'Terraform init - plan - apply workflow'
+name: workflow_tf_init_plan_apply
 
 on:
   workflow_call:
@@ -276,64 +276,72 @@ jobs:
   #  \______/ \__|  \__| \_______| \_______|\__|  \__| \______/    \_/    
 
   checkov_scan:
+    uses:  .github/workflows/step_checkov_scan.yml@init
     needs: terraform_plan
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     name: Checkov Security Scan
-    if: ${{ inputs.checkov_scan }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    # if: ${{ inputs.checkov_scan }}
+    with:
+      config_directory: ${{ inputs.config_directory }}
+      checkov_scan: true
+      github_owner: ${{ inputs.github_owner }}
+    secrets:
+      github_pat: ${{ secrets.github_pat }}
 
-      - name: Download Plan JSON
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-json
-          path: ${{ inputs.config_directory }}
+    # steps:
+    #   - name: Checkout Repository
+    #     uses: actions/checkout@v4
 
-      - name: Install Checkov
-        run: |
-          pip install checkov
+    #   - name: Download Plan JSON
+    #     uses: actions/download-artifact@v4
+    #     with:
+    #       name: tfplan-json
+    #       path: ${{ inputs.config_directory }}
 
-      - name: Run Checkov Scan
-        working-directory: ${{ inputs.config_directory }}
-        run: |
-          checkov \
-            --file plan_output.json \
-            --repo-root-for-plan-enrichment ${{ inputs.config_directory }} \
-            --deep-analysis \
-            --output cli \
-            --output junitxml \
-            --output-file-path console,checkov_report.xml
+    #   - name: Install Checkov
+    #     run: |
+    #       pip install checkov
 
-      - name: Upload Checkov Scan Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: checkov-report
-          path: ${{ inputs.config_directory }}/checkov_report.xml
-          overwrite: true
+    #   - name: Run Checkov Scan
+    #     working-directory: ${{ inputs.config_directory }}
+    #     run: |
+    #       checkov \
+    #         --file plan_output.json \
+    #         --repo-root-for-plan-enrichment ${{ inputs.config_directory }} \
+    #         --deep-analysis \
+    #         --output cli \
+    #         --output junitxml \
+    #         --output-file-path console,checkov_report.xml
 
-      - name: Comment Checkov Scan Output
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.github_pat }}
-          script: |
-            const fs = require('fs');
-            const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
-            const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
-            const output = `
-              <details>
-              <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
-              \n\`\`\`\n${checkovReport}\n\`\`\`
-              </details>
-            `;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            });
+    #   - name: Upload Checkov Scan Report
+    #     if: always()
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: checkov-report
+    #       path: ${{ inputs.config_directory }}/checkov_report.xml
+    #       overwrite: true
+
+    #   - name: Comment Checkov Scan Output
+    #     if: github.event_name == 'pull_request'
+    #     uses: actions/github-script@v7
+    #     with:
+    #       github-token: ${{ secrets.github_pat }}
+    #       script: |
+    #         const fs = require('fs');
+    #         const checkovReportPath = '${{ github.workspace }}/${{ inputs.config_directory }}/';
+    #         const checkovReport = fs.readFileSync(checkovReportPath + 'checkov_report.xml', 'utf8');
+    #         const output = `
+    #           <details>
+    #           <summary>${{ inputs.config_directory }} - Checkov Scan Results (click to expand)</summary>
+    #           \n\`\`\`\n${checkovReport}\n\`\`\`
+    #           </details>
+    #         `;
+    #         github.rest.issues.createComment({
+    #           issue_number: context.issue.number,
+    #           owner: context.repo.owner,
+    #           repo: context.repo.repo,
+    #           body: output
+    #         });
 
       # - name: Comment Checkov Scan Output
       #   if: github.event_name == 'pull_request'

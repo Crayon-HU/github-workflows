@@ -8,13 +8,6 @@ on:
         required: true
         type: string
 
-      #Checkov
-      checkov_scan:
-        required: false
-        type: boolean
-        default: false
-        description: 'Set to true to run Checkov security scan.'
-
       #GitHub Owner
       github_owner:
         required: true
@@ -27,10 +20,8 @@ on:
 
 jobs:
   checkov_scan:
-    # needs: terraform_plan
     runs-on: ubuntu-latest
     name: Checkov Security Scan
-    if: ${{ inputs.checkov_scan }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

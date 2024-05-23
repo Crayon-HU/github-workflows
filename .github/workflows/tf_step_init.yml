@@ -1,0 +1,89 @@
+# tf_step_init.yml
+name: tf_step_init
+
+on:
+  workflow_call:
+    inputs:
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+
+      #Terraform Backend Type
+      backend_type:
+        required: true
+        type: string
+        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+
+      #S3 Backend
+      aws_region:
+        required: false
+        type: string
+        default: 'eu-amsterdam-1'
+      aws_key:
+        required: false
+        type: string
+      aws_backend_skip_credentials_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_region_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_requesting_account_id:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_metadata_api_check:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_s3_checksum:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_use_path_style:
+        required: false
+        type: boolean
+        default: true
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+
+    secrets:
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  tf_step_init:
+    runs-on: ubuntu-latest
+    name: Terraform Init
+    steps:
+      - name: Terraform Init with Azure backend
+        if: inputs.backend_type == 'azure'
+        id: init_azure_backend
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
+            -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
+            -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
+            -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      - name: Terraform Init with S3 backend
+        if: inputs.backend_type == 's3'
+        id: init_s3_backend
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="region=${{ inputs.aws_region }}" \
+            -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
+            -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
+            -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
+            -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
+            -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
+            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"

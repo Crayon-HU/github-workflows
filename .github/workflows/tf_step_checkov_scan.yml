@@ -1,4 +1,5 @@
-name: step_checkov_scan
+# tf_step_checkov_scan.yml
+name: tf_step_checkov_scan
 
 on:
   workflow_call:

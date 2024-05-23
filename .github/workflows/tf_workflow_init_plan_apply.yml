@@ -1,4 +1,5 @@
-name: workflow_tf_init_plan_apply
+# tf_workflow_init_plan_apply.yml
+name: tf_workflow_init_plan_apply
 
 on:
   workflow_call:
@@ -196,30 +197,47 @@ jobs:
         if: inputs.backend_type == 'azure'
         run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
 
-      - name: Terraform Init with Azure backend
-        if: inputs.backend_type == 'azure'
-        id: init_azure_backend
-        working-directory: ${{ inputs.config_directory }}
-        run: |
-          terraform init \
-            -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
-            -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
-            -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
-            -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+      - name: Terraform Init
+        uses: ./.github/workflows/tf_step_init.yml
+        with:
+          backend_type: ${{ inputs.backend_type }}
+          config_directory: ${{ inputs.config_directory }}
+          aws_region: ${{ inputs.aws_region }}
+          aws_key: ${{ inputs.aws_key }}
+          aws_backend_skip_credentials_validation: ${{ inputs.aws_backend_skip_credentials_validation }}
+          aws_backend_skip_region_validation: ${{ inputs.aws_backend_skip_region_validation }}
+          aws_backend_skip_requesting_account_id: ${{ inputs.aws_backend_skip_requesting_account_id }}
+          aws_backend_skip_metadata_api_check: ${{ inputs.aws_backend_skip_metadata_api_check }}
+          aws_backend_skip_s3_checksum: ${{ inputs.aws_backend_skip_s3_checksum }}
+          aws_backend_use_path_style: ${{ inputs.aws_backend_use_path_style }}
+          github_owner: ${{ inputs.github_owner }}
+        # secrets:
+        #   github_pat: ${{ secrets.github_pat }}
 
-      - name: Terraform Init with S3 backend
-        if: inputs.backend_type == 's3'
-        id: init_s3_backend
-        working-directory: ${{ inputs.config_directory }}
-        run: |
-          terraform init \
-            -backend-config="region=${{ inputs.aws_region }}" \
-            -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
-            -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
-            -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
-            -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
-            -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
-            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
+      # - name: Terraform Init with Azure backend
+      #   if: inputs.backend_type == 'azure'
+      #   id: init_azure_backend
+      #   working-directory: ${{ inputs.config_directory }}
+      #   run: |
+      #     terraform init \
+      #       -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
+      #       -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
+      #       -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
+      #       -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      # - name: Terraform Init with S3 backend
+      #   if: inputs.backend_type == 's3'
+      #   id: init_s3_backend
+      #   working-directory: ${{ inputs.config_directory }}
+      #   run: |
+      #     terraform init \
+      #       -backend-config="region=${{ inputs.aws_region }}" \
+      #       -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
+      #       -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
+      #       -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
+      #       -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
+      #       -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
+      #       -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
 
       - name: Terraform Plan
         id: plan
@@ -276,7 +294,7 @@ jobs:
   #  \______/ \__|  \__| \_______| \_______|\__|  \__| \______/    \_/    
 
   checkov_scan:
-    uses:  ./.github/workflows/step_checkov_scan.yml
+    uses:  ./.github/workflows/tf_step_checkov_scan.yml
     needs: terraform_plan
     if: ${{ inputs.checkov_scan }}
     with:

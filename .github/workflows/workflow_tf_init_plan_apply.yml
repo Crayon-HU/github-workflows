@@ -276,7 +276,7 @@ jobs:
   #  \______/ \__|  \__| \_______| \_______|\__|  \__| \______/    \_/    
 
   checkov_scan:
-    uses:  .github/workflows/step_checkov_scan.yml@init
+    uses:  ./.github/workflows/step_checkov_scan.yml@init
     needs: terraform_plan
     # runs-on: ubuntu-latest
     name: Checkov Security Scan

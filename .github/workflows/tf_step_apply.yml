@@ -16,13 +16,6 @@ on:
         type: string
         description: 'Type of the backend to use. Valid values are "azure" and "s3".'
 
-      #Checkov
-      checkov_scan:
-        required: false
-        type: boolean
-        default: false
-        description: 'Set to true to run Checkov security scan.'
-
       #Terraform Setup
       terraform_version:
         required: false

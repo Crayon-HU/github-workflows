@@ -212,7 +212,7 @@ jobs:
 
   checkov_scan:
     uses:  ./.github/workflows/tf_step_checkov_scan.yml
-    needs: terraform_plan
+    needs: tf_workflow_plan
     if: ${{ inputs.checkov_scan }}
     with:
       config_directory: ${{ inputs.config_directory }}
@@ -279,5 +279,5 @@ jobs:
       aws_secret_key: ${{ secrets.aws_secret_key }}
       #GitHub PAT
       github_pat: ${{ secrets.github_pat }}
-    needs: [terraform_plan, checkov_scan]
+    needs: [tf_workflow_plan, checkov_scan]
     if: ${{ always() && (needs.checkov_scan.result == 'success' || !inputs.checkov_scan) }}

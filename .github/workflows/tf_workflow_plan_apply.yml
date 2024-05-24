@@ -350,7 +350,7 @@ jobs:
   #           \__|      \__|           \______/ 
 
   terraform_apply:
-    uses:  ./.github/workflows/tf_step_plan.yml
+    uses:  ./.github/workflows/tf_step_apply.yml
     with:
       runner: ${{ inputs.runner }}
       config_directory: ${{ inputs.config_directory }}

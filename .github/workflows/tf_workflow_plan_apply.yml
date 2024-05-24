@@ -154,7 +154,7 @@ jobs:
   # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
   # \__|      \__| \_______|\__|  \__|
 
-  terraform_plan:
+  tf_workflow_plan:
     uses:  ./.github/workflows/tf_step_plan.yml
     with:
       runner: ${{ inputs.runner }}
@@ -233,7 +233,7 @@ jobs:
   #           $$ |      $$ |          \$$$$$$  |
   #           \__|      \__|           \______/ 
 
-  terraform_apply:
+  tf_workflow_apply:
     uses:  ./.github/workflows/tf_step_apply.yml
     with:
       runner: ${{ inputs.runner }}

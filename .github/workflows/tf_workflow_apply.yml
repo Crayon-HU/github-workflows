@@ -1,5 +1,5 @@
-# tf_workflow_init_plan_apply.yml
-name: tf_workflow_init_plan_apply
+# tf_workflow_apply.yml
+name: tf_workflow_apply
 
 on:
   workflow_call:
@@ -138,7 +138,7 @@ on:
         required: true
 
 jobs:
-  terraform_apply:
+  tf_workflow_apply:
     uses:  ./.github/workflows/tf_step_apply.yml
     with:
       runner: ${{ inputs.runner }}

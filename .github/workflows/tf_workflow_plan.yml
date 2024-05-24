@@ -1,5 +1,5 @@
 # tf_workflow_plan.yml
-name: tf_workflow_init_plan_apply
+name: tf_workflow_plan
 
 on:
   workflow_call:
@@ -154,7 +154,7 @@ jobs:
   # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
   # \__|      \__| \_______|\__|  \__|
 
-  terraform_plan:
+  tf_workflow_plan:
     uses:  ./.github/workflows/tf_step_plan.yml
     with:
       runner: ${{ inputs.runner }}
@@ -212,7 +212,7 @@ jobs:
 
   checkov_scan:
     uses:  ./.github/workflows/tf_step_checkov_scan.yml
-    needs: terraform_plan
+    needs: tf_workflow_plan
     if: ${{ inputs.checkov_scan }}
     with:
       config_directory: ${{ inputs.config_directory }}

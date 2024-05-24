@@ -5,6 +5,12 @@ name: tf_workflow_init_plan_apply
 on:
   workflow_call:
     inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
       #Terraform Configuration
       config_directory:
         required: true
@@ -143,7 +149,7 @@ jobs:
   # \__|      \__| \_______|\__|  \__|
 
   terraform_plan:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Plan Terraform Configuration
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}

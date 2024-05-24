@@ -4,6 +4,12 @@ name: tf_step_checkov_scan
 on:
   workflow_call:
     inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
       #Terraform Configuration
       config_directory:
         required: true
@@ -21,7 +27,7 @@ on:
 
 jobs:
   checkov_scan:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Checkov Security Scan
     steps:
       - name: Checkout Repository

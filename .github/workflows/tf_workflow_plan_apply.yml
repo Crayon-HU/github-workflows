@@ -4,6 +4,12 @@ name: tf_workflow_init_plan_apply
 on:
   workflow_call:
     inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
       #Terraform Configuration
       config_directory:
         required: true
@@ -151,6 +157,7 @@ jobs:
   terraform_plan:
     uses:  ./.github/workflows/tf_step_plan.yml
     with:
+      runner: ${{ inputs.runner }}
       config_directory: ${{ inputs.config_directory }}
       backend_type: ${{ inputs.backend_type }}
       github_owner: ${{ inputs.github_owner }}
@@ -345,6 +352,7 @@ jobs:
   terraform_apply:
     uses:  ./.github/workflows/tf_step_plan.yml
     with:
+      runner: ${{ inputs.runner }}
       config_directory: ${{ inputs.config_directory }}
       backend_type: ${{ inputs.backend_type }}
       github_owner: ${{ inputs.github_owner }}

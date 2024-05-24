@@ -5,6 +5,12 @@ name: tf_workflow_init_plan_apply
 on:
   workflow_call:
     inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
       #Terraform Configuration
       config_directory:
         required: true
@@ -134,7 +140,7 @@ on:
 
 jobs:
   tf_step_apply:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Apply Terraform Configuration
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}

@@ -1,0 +1,244 @@
+# step_tf_apply.yml
+# tf_workflow_init_plan_apply.yml
+name: tf_workflow_init_plan_apply
+
+on:
+  workflow_call:
+    inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+
+      #Terraform Backend Type
+      backend_type:
+        required: true
+        type: string
+        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+
+      #Terraform Setup
+      terraform_version:
+        required: false
+        type: string
+        default: 1.8.2
+
+      terraform_wrapper:
+        required: false
+        type: boolean
+        default: false
+
+      #Terraform Providers
+      provider_azurerm:
+        required: false
+        type: boolean
+        default: false
+
+      provider_oci:
+        required: false
+        type: boolean
+        default: false
+
+      provider_github:
+        required: false
+        type: boolean
+        default: false
+
+      #Azure Backend
+      azure_backend_snapshot:
+        required: false
+        type: boolean
+        default: true
+      azure_backend_use_azuread:
+        required: false
+        type: boolean
+        default: true
+
+      #S3 Backend
+      aws_region:
+        required: false
+        type: string
+        default: 'eu-amsterdam-1'
+      aws_key:
+        required: false
+        type: string
+      aws_backend_skip_credentials_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_region_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_requesting_account_id:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_metadata_api_check:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_s3_checksum:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_use_path_style:
+        required: false
+        type: boolean
+        default: true
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+
+    secrets:
+      #Azure
+      azure_tenant_id:
+        required: false
+      azure_subscription_id:
+        required: false
+      azure_client_id:
+        required: false
+      azure_client_secret:
+        required: false
+
+      #Azure Backend
+      azure_backend_resource_group:
+        required: false
+      azure_backend_storage_account:
+        required: false
+      azure_backend_storage_container:
+        required: false
+      azure_backend_storage_key:
+        required: false
+
+      #Oracle Cloud
+      oci_tenancy:
+        required: false
+      oci_user:
+        required: false
+      oci_key:
+        required: false
+      oci_fingerprint:
+        required: false
+
+      #S3 Backend
+      aws_access_key:
+        required: false
+      aws_secret_key:
+        required: false
+
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  tf_step_apply:
+    runs-on: ${{ inputs.runner }}
+    name: Apply Terraform Configuration
+    env:
+      TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
+      TF_VAR_USER_OCID: ${{ secrets.oci_user }}
+      TF_VAR_PRIVATE_KEY: ${{ secrets.oci_key }}
+      TF_VAR_FINGERPRINT: ${{ secrets.oci_fingerprint }}
+
+    steps:
+      - name: Set Azure backend environment variables
+        if: inputs.backend_type == 'azure'
+        run: |
+          echo "ARM_SNAPSHOT=${{ inputs.azure_backend_snapshot }}" >> $GITHUB_ENV
+          echo "ARM_USE_AZUREAD=${{ inputs.azure_backend_use_azuread }}" >> $GITHUB_ENV
+
+      - name: Set Azure environment variables
+        if: inputs.backend_type == 'azure' || inputs.provider_azurerm == true
+        run: |
+          echo "ARM_TENANT_ID=${{ secrets.azure_tenant_id }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.azure_subscription_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=${{ secrets.azure_client_id }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.azure_client_secret }}" >> $GITHUB_ENV
+
+      - name: Set S3 backend environment variables
+        if: inputs.backend_type == 's3'
+        run: |
+          echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
+
+      - name: Set GitHub environment variables
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
+          echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+          terraform_wrapper: ${{ inputs.terraform_wrapper }}
+
+      - name: Login to Azure CLI
+        if: inputs.backend_type == 'azure'
+        run: az login --service-principal --username ${{ secrets.azure_client_id }} --password ${{ secrets.azure_client_secret }} --tenant ${{ secrets.azure_tenant_id }}  
+
+      - name: Download Plan File
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-file
+          path: ${{ inputs.config_directory }}
+
+      - name: Terraform Init with Azure backend
+        if: inputs.backend_type == 'azure'
+        id: init_backend_azure
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
+            -backend-config="storage_account_name=${{ secrets.azure_backend_storage_account }}" \
+            -backend-config="container_name=${{ secrets.azure_backend_storage_container }}" \
+            -backend-config="key=${{ secrets.azure_backend_storage_key }}"
+
+      - name: Terraform Init with S3 backend
+        if: inputs.backend_type == 's3'
+        id: init_backend_s3
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="region=${{ inputs.aws_region }}" \
+            -backend-config="skip_credentials_validation=${{ inputs.aws_backend_skip_credentials_validation }}" \
+            -backend-config="skip_region_validation=${{ inputs.aws_backend_skip_region_validation }}" \
+            -backend-config="skip_requesting_account_id=${{ inputs.aws_backend_skip_requesting_account_id }}" \
+            -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
+            -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
+            -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
+
+      - name: Terraform Apply
+        id: apply
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform apply -auto-approve "plan_output.tfplan" > apply_output.txt
+          apply_output=$(grep '^Apply' apply_output.txt)
+          echo "::set-output name=stdout::$apply_output"
+
+      - name: Comment Apply Output
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github_pat }}
+          script: |
+            const applyOutput = '${{ inputs.config_directory }} - ${{ steps.apply.outputs.stdout }}';
+            if (applyOutput) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: applyOutput
+              });
+            }

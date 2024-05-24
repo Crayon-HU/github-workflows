@@ -1,0 +1,283 @@
+# tf_workflow_init_plan_apply.yml
+name: tf_workflow_init_plan_apply
+
+on:
+  workflow_call:
+    inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+
+      #Terraform Backend Type
+      backend_type:
+        required: true
+        type: string
+        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+
+      #Checkov
+      checkov_scan:
+        required: false
+        type: boolean
+        default: false
+        description: 'Set to true to run Checkov security scan.'
+
+      #Terraform Setup
+      terraform_version:
+        required: false
+        type: string
+        default: 1.8.2
+
+      terraform_wrapper:
+        required: false
+        type: boolean
+        default: false
+
+      #Terraform Providers
+      provider_azurerm:
+        required: false
+        type: boolean
+        default: false
+
+      provider_oci:
+        required: false
+        type: boolean
+        default: false
+
+      provider_github:
+        required: false
+        type: boolean
+        default: false
+
+      #Azure Backend
+      azure_backend_snapshot:
+        required: false
+        type: boolean
+        default: true
+      azure_backend_use_azuread:
+        required: false
+        type: boolean
+        default: true
+
+      #S3 Backend
+      aws_region:
+        required: false
+        type: string
+        default: 'eu-amsterdam-1'
+      aws_key:
+        required: false
+        type: string
+      aws_backend_skip_credentials_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_region_validation:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_requesting_account_id:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_metadata_api_check:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_skip_s3_checksum:
+        required: false
+        type: boolean
+        default: true
+      aws_backend_use_path_style:
+        required: false
+        type: boolean
+        default: true
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+
+    secrets:
+      #Azure
+      azure_tenant_id:
+        required: false
+      azure_subscription_id:
+        required: false
+      azure_client_id:
+        required: false
+      azure_client_secret:
+        required: false
+
+      #Azure Backend
+      azure_backend_resource_group:
+        required: false
+      azure_backend_storage_account:
+        required: false
+      azure_backend_storage_container:
+        required: false
+      azure_backend_storage_key:
+        required: false
+
+      #Oracle Cloud
+      oci_tenancy:
+        required: false
+      oci_user:
+        required: false
+      oci_key:
+        required: false
+      oci_fingerprint:
+        required: false
+
+      #S3 Backend
+      aws_access_key:
+        required: false
+      aws_secret_key:
+        required: false
+
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  # $$$$$$$\  $$\                     
+  # $$  __$$\ $$ |                    
+  # $$ |  $$ |$$ | $$$$$$\  $$$$$$$\  
+  # $$$$$$$  |$$ | \____$$\ $$  __$$\ 
+  # $$  ____/ $$ | $$$$$$$ |$$ |  $$ |
+  # $$ |      $$ |$$  __$$ |$$ |  $$ |
+  # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
+  # \__|      \__| \_______|\__|  \__|
+
+  tf_workflow_plan:
+    uses:  ./.github/workflows/tf_step_plan.yml
+    with:
+      runner: ${{ inputs.runner }}
+      config_directory: ${{ inputs.config_directory }}
+      backend_type: ${{ inputs.backend_type }}
+      github_owner: ${{ inputs.github_owner }}
+      terraform_version: ${{ inputs.terraform_version }}
+      terraform_wrapper: ${{ inputs.terraform_wrapper }}
+      #Terraform Providers
+      provider_azurerm: ${{ inputs.provider_azurerm }}
+      provider_oci: ${{ inputs.provider_oci }}
+      provider_github: ${{ inputs.provider_github }}
+      #Azure Backend
+      azure_backend_snapshot: ${{ inputs.azure_backend_snapshot }}
+      azure_backend_use_azuread: ${{ inputs.azure_backend_use_azuread }}
+      #S3 Backend
+      aws_region: ${{ inputs.aws_region }}
+      aws_key: ${{ inputs.aws_key }}
+      aws_backend_skip_credentials_validation: ${{ inputs.aws_backend_skip_credentials_validation }}
+      aws_backend_skip_region_validation: ${{ inputs.aws_backend_skip_region_validation }}
+      aws_backend_skip_requesting_account_id: ${{ inputs.aws_backend_skip_requesting_account_id }}
+      aws_backend_skip_metadata_api_check: ${{ inputs.aws_backend_skip_metadata_api_check }}
+      aws_backend_skip_s3_checksum: ${{ inputs.aws_backend_skip_s3_checksum }}
+      aws_backend_use_path_style: ${{ inputs.aws_backend_use_path_style }}
+    secrets:
+      #Azure
+      azure_tenant_id: ${{ secrets.azure_tenant_id }}
+      azure_subscription_id: ${{ secrets.azure_subscription_id }}
+      azure_client_id: ${{ secrets.azure_client_id }}
+      azure_client_secret: ${{ secrets.azure_client_secret }}
+      #Azure Backend
+      azure_backend_resource_group: ${{ secrets.azure_backend_resource_group }}
+      azure_backend_storage_account: ${{ secrets.azure_backend_storage_account }}
+      azure_backend_storage_container: ${{ secrets.azure_backend_storage_container }}
+      azure_backend_storage_key: ${{ secrets.azure_backend_storage_key }}
+      #Oracle Cloud
+      oci_tenancy: ${{ secrets.oci_tenancy }}
+      oci_user: ${{ secrets.oci_user }}
+      oci_key: ${{ secrets.oci_key }}
+      oci_fingerprint: ${{ secrets.oci_fingerprint }}
+      #S3 Backend
+      aws_access_key: ${{ secrets.aws_access_key }}
+      aws_secret_key: ${{ secrets.aws_secret_key }}
+      #GitHub PAT
+      github_pat: ${{ secrets.github_pat }}
+
+  #  $$$$$$\  $$\                           $$\                           
+  # $$  __$$\ $$ |                          $$ |                          
+  # $$ /  \__|$$$$$$$\   $$$$$$\   $$$$$$$\ $$ |  $$\  $$$$$$\ $$\    $$\ 
+  # $$ |      $$  __$$\ $$  __$$\ $$  _____|$$ | $$  |$$  __$$\\$$\  $$  |
+  # $$ |      $$ |  $$ |$$$$$$$$ |$$ /      $$$$$$  / $$ /  $$ |\$$\$$  / 
+  # $$ |  $$\ $$ |  $$ |$$   ____|$$ |      $$  _$$<  $$ |  $$ | \$$$  /  
+  # \$$$$$$  |$$ |  $$ |\$$$$$$$\ \$$$$$$$\ $$ | \$$\ \$$$$$$  |  \$  /   
+  #  \______/ \__|  \__| \_______| \_______|\__|  \__| \______/    \_/    
+
+  checkov_scan:
+    uses:  ./.github/workflows/tf_step_checkov_scan.yml
+    needs: tf_workflow_plan
+    if: ${{ inputs.checkov_scan }}
+    with:
+      config_directory: ${{ inputs.config_directory }}
+      github_owner: ${{ inputs.github_owner }}
+    secrets:
+      github_pat: ${{ secrets.github_pat }}
+
+
+  #  $$$$$$\                      $$\           
+  # $$  __$$\                     $$ |          
+  # $$ /  $$ | $$$$$$\   $$$$$$\  $$ |$$\   $$\ 
+  # $$$$$$$$ |$$  __$$\ $$  __$$\ $$ |$$ |  $$ |
+  # $$  __$$ |$$ /  $$ |$$ /  $$ |$$ |$$ |  $$ |
+  # $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |$$ |  $$ |
+  # $$ |  $$ |$$$$$$$  |$$$$$$$  |$$ |\$$$$$$$ |
+  # \__|  \__|$$  ____/ $$  ____/ \__| \____$$ |
+  #           $$ |      $$ |          $$\   $$ |
+  #           $$ |      $$ |          \$$$$$$  |
+  #           \__|      \__|           \______/ 
+
+  tf_workflow_apply:
+    uses:  ./.github/workflows/tf_step_apply.yml
+    with:
+      runner: ${{ inputs.runner }}
+      config_directory: ${{ inputs.config_directory }}
+      backend_type: ${{ inputs.backend_type }}
+      github_owner: ${{ inputs.github_owner }}
+      terraform_version: ${{ inputs.terraform_version }}
+      terraform_wrapper: ${{ inputs.terraform_wrapper }}
+      #Terraform Providers
+      provider_azurerm: ${{ inputs.provider_azurerm }}
+      provider_oci: ${{ inputs.provider_oci }}
+      provider_github: ${{ inputs.provider_github }}
+      #Azure Backend
+      azure_backend_snapshot: ${{ inputs.azure_backend_snapshot }}
+      azure_backend_use_azuread: ${{ inputs.azure_backend_use_azuread }}
+      #S3 Backend
+      aws_region: ${{ inputs.aws_region }}
+      aws_key: ${{ inputs.aws_key }}
+      aws_backend_skip_credentials_validation: ${{ inputs.aws_backend_skip_credentials_validation }}
+      aws_backend_skip_region_validation: ${{ inputs.aws_backend_skip_region_validation }}
+      aws_backend_skip_requesting_account_id: ${{ inputs.aws_backend_skip_requesting_account_id }}
+      aws_backend_skip_metadata_api_check: ${{ inputs.aws_backend_skip_metadata_api_check }}
+      aws_backend_skip_s3_checksum: ${{ inputs.aws_backend_skip_s3_checksum }}
+      aws_backend_use_path_style: ${{ inputs.aws_backend_use_path_style }}
+    secrets:
+      #Azure
+      azure_tenant_id: ${{ secrets.azure_tenant_id }}
+      azure_subscription_id: ${{ secrets.azure_subscription_id }}
+      azure_client_id: ${{ secrets.azure_client_id }}
+      azure_client_secret: ${{ secrets.azure_client_secret }}
+      #Azure Backend
+      azure_backend_resource_group: ${{ secrets.azure_backend_resource_group }}
+      azure_backend_storage_account: ${{ secrets.azure_backend_storage_account }}
+      azure_backend_storage_container: ${{ secrets.azure_backend_storage_container }}
+      azure_backend_storage_key: ${{ secrets.azure_backend_storage_key }}
+      #Oracle Cloud
+      oci_tenancy: ${{ secrets.oci_tenancy }}
+      oci_user: ${{ secrets.oci_user }}
+      oci_key: ${{ secrets.oci_key }}
+      oci_fingerprint: ${{ secrets.oci_fingerprint }}
+      #S3 Backend
+      aws_access_key: ${{ secrets.aws_access_key }}
+      aws_secret_key: ${{ secrets.aws_secret_key }}
+      #GitHub PAT
+      github_pat: ${{ secrets.github_pat }}
+    needs: [tf_workflow_plan, checkov_scan]
+    if: ${{ always() && (needs.checkov_scan.result == 'success' || !inputs.checkov_scan) }}

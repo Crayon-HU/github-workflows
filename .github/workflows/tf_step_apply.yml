@@ -101,22 +101,22 @@ on:
       # pg_backend_database:
       #   required: false
       #   type: string
-      pg_backend_schema:
-        required: false
-        type: string
-        default: terraform_remote_state
-      pg_backend_skip_schema_creation:
-        required: false
-        type: boolean
-        default: false
-      pg_backend_skip_table_creation:
-        required: false
-        type: boolean
-        default: false
-      pg_backend_skip_index_creation:
-        required: false
-        type: boolean
-        default: false
+      # pg_backend_schema:
+      #   required: false
+      #   type: string
+      #   default: terraform_remote_state
+      # pg_backend_skip_schema_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
+      # pg_backend_skip_table_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
+      # pg_backend_skip_index_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
 
       #GitHub Owner
       github_owner:
@@ -265,10 +265,10 @@ jobs:
         working-directory: ${{ inputs.config_directory }}
         run: |
           terraform init \
-            -backend-config="schema_name=${{ inputs.pg_backend_schema }}" \
-            -backend-config="skip_schema_creation=${{ inputs.pg_backend_skip_schema_creation }}" \
-            -backend-config="skip_table_creation=${{ inputs.pg_backend_skip_table_creation }}" \
-            -backend-config="skip_index_creation=${{ inputs.pg_backend_skip_index_creation }}" \
+          -backend-config="schema_name=${{ inputs.config_directory }}" \
+          -backend-config="skip_schema_creation=false" \
+          -backend-config="skip_table_creation=false" \
+          -backend-config="skip_index_creation=false"
 
       - name: Terraform Apply
         id: apply

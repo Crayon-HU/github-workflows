@@ -108,21 +108,21 @@ on:
       # pg_backend_database:
       #   required: false
       #   type: string
-      pg_backend_schema:
-        required: false
-        type: string
-      pg_backend_skip_schema_creation:
-        required: false
-        type: boolean
-        default: false
-      pg_backend_skip_table_creation:
-        required: false
-        type: boolean
-        default: false
-      pg_backend_skip_index_creation:
-        required: false
-        type: boolean
-        default: false
+      # pg_backend_schema:
+      #   required: false
+      #   type: string
+      # pg_backend_skip_schema_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
+      # pg_backend_skip_table_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
+      # pg_backend_skip_index_creation:
+      #   required: false
+      #   type: boolean
+      #   default: false
 
       #GitHub Owner
       github_owner:
@@ -217,10 +217,10 @@ jobs:
       # pg_backend_host: ${{ inputs.pg_backend_host }}
       # pg_backend_port: ${{ inputs.pg_backend_port }}
       # pg_backend_database: ${{ inputs.pg_backend_database }}
-      pg_backend_schema: ${{ inputs.pg_backend_schema }}
-      pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
-      pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}
-      pg_backend_skip_index_creation: ${{ inputs.pg_backend_skip_index_creation }}
+      # pg_backend_schema: ${{ inputs.pg_backend_schema }}
+      # pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
+      # pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}
+      # pg_backend_skip_index_creation: ${{ inputs.pg_backend_skip_index_creation }}
     secrets:
       #Azure
       azure_tenant_id: ${{ secrets.azure_tenant_id }}
@@ -308,10 +308,10 @@ jobs:
       # pg_backend_host: ${{ inputs.pg_backend_host }}
       # pg_backend_port: ${{ inputs.pg_backend_port }}
       # pg_backend_database: ${{ inputs.pg_backend_database }}
-      pg_backend_schema: ${{ inputs.pg_backend_schema }}
-      pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
-      pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}
-      pg_backend_skip_index_creation: ${{ inputs.pg_backend_skip_index_creation }}
+      # pg_backend_schema: ${{ inputs.pg_backend_schema }}
+      # pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
+      # pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}
+      # pg_backend_skip_index_creation: ${{ inputs.pg_backend_skip_index_creation }}
     secrets:
       #Azure
       azure_tenant_id: ${{ secrets.azure_tenant_id }}

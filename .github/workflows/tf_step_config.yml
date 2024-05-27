@@ -44,6 +44,11 @@ jobs:
   tf_step_config:
     runs-on: ${{ inputs.runner }}
     steps:
+      - name: Set GitHub environment variables
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
+          echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
+
       - name: Checkout infra repository
         uses: actions/checkout@v4
         with:
@@ -63,38 +68,45 @@ jobs:
         with:
           python-version: '3.12'
 
-      # - name: Install JSON Merge and Validation dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install jsonmerge jsonschema
+      - name: Install JSON Merge and Validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install glob jsonmerge
 
       - name: Merge and Validate JSON configurations
         run: |
           import json
           import os
+          from glob import glob
           from jsonmerge import merge
 
-          # Helper function to load and validate JSON configuration
-          def load_json(file_path):
-              try:
-                  with open(file_path, 'r') as f:
-                      return json.load(f)
-              except json.JSONDecodeError as e:
-                  print(f"JSON syntax error in {file_path}: {e}")
-                  exit(1)
+          # Get workflow inputs
+          config_directory = '${{ inputs.config_directory }}'
 
-          # Paths to JSON files
-          override_path = os.path.join('infra', 'config_override', env['PATHTOSTATE'], '*.json')
-          config_path = os.path.join('config', 'config', env['PATHTOSTATE'], '*.json')
-          default_config_path = os.path.join('config', 'config', env['PATHTOSTATE'], '*.json')
+          # Helper function to load and validate JSON configuration
+          def load_json(pattern):
+              configs = {}
+              for file_path in glob(pattern, recursive=True):
+                  try:
+                      with open(file_path, 'r') as f:
+                          configs.update(json.load(f))
+                  except json.JSONDecodeError as e:
+                      print(f"JSON syntax error in {file_path}: {e}")
+                      exit(1)
+              return configs
+
+          # Paths to JSON file patterns
+          override_pattern = os.path.join('infra', 'config_override', config_directory, '*.json')
+          config_pattern = os.path.join('config', 'config', config_directory, '*.json')
+          local_pattern = os.path.join('infra', 'config', config_directory, '*.json')
 
           # Load and validate configurations
-          default_config = load_json(default_config_path) if os.path.exists(default_config_path) else {}
-          config = load_json(config_path) if os.path.exists(config_path) else {}
-          override_config = load_json(override_path) if os.path.exists(override_path) else {}
+          local_config = load_json(local_pattern) if os.path.exists(local_pattern) else {}
+          config = load_json(config_pattern) if os.path.exists(config_pattern) else {}
+          override_config = load_json(override_pattern) if os.path.exists(override_pattern) else {}
 
           # Merge configurations
-          merged_config = merge(merge(default_config, config), override_config)
+          merged_config = merge(merge(local_config, config), override_config)
 
           # Write terraform.tfvars.json
           tfvars_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'terraform.tfvars.json')

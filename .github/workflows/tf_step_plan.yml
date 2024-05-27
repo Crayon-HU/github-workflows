@@ -1,6 +1,5 @@
-# step_tf_plan.yml
-# tf_workflow_init_plan_apply.yml
-name: tf_workflow_init_plan_apply
+# tf_step_plan.yml
+name: tf_step_plan
 
 on:
   workflow_call:
@@ -92,7 +91,7 @@ on:
         type: boolean
         default: true
 
-      #PostGres Backend
+      #Postgres Backend
       # pg_backend_host:
       #   required: false
       #   type: string
@@ -174,16 +173,7 @@ on:
         required: true
 
 jobs:
-  # $$$$$$$\  $$\                     
-  # $$  __$$\ $$ |                    
-  # $$ |  $$ |$$ | $$$$$$\  $$$$$$$\  
-  # $$$$$$$  |$$ | \____$$\ $$  __$$\ 
-  # $$  ____/ $$ | $$$$$$$ |$$ |  $$ |
-  # $$ |      $$ |$$  __$$ |$$ |  $$ |
-  # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
-  # \__|      \__| \_______|\__|  \__|
-
-  terraform_plan:
+  tf_step_plan:
     runs-on: ${{ inputs.runner }}
     name: Plan Terraform Configuration
     env:

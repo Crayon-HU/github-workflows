@@ -102,7 +102,7 @@ on:
       pg_backend_database:
         required: false
         type: string
-      pg_backend_schema_name:
+      pg_backend_schema:
         required: false
         type: string
       pg_backend_skip_schema_creation:

@@ -217,7 +217,6 @@ jobs:
       # pg_backend_host: ${{ inputs.pg_backend_host }}
       # pg_backend_port: ${{ inputs.pg_backend_port }}
       # pg_backend_database: ${{ inputs.pg_backend_database }}
-      pg_backend_connection_string: ${{ secrets.pg_backend_connection_string}}
       pg_backend_schema: ${{ inputs.pg_backend_schema }}
       pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
       pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}
@@ -242,6 +241,7 @@ jobs:
       aws_access_key: ${{ secrets.aws_access_key }}
       aws_secret_key: ${{ secrets.aws_secret_key }}
       #PostGres Backend
+      pg_backend_connection_string: ${{ secrets.pg_backend_connection_string}}
       pg_backend_username: ${{ secrets.pg_backend_username }}
       pg_backend_password: ${{ secrets.pg_backend_password }}
       #GitHub PAT

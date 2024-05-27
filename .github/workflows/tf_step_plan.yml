@@ -216,8 +216,8 @@ jobs:
       - name: Set PostGres environment variables
         if: inputs.backend_type == 'pg'
         run: |
-          echo "PG_USER=${{ secrets.pg_backend_username }}" >> $GITHUB_ENV
-          echo "PG_PASSWORD=${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
+          echo "PGUSER=${{ secrets.pg_backend_username }}" >> $GITHUB_ENV
+          echo "PGPASSWORD=${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
           echo "PG_CONN_STR=${{ secrets.pg_backend_connection_string }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables

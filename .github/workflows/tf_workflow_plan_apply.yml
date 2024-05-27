@@ -99,15 +99,15 @@ on:
         default: true
 
       #PostGrest backend
-      pg_backend_host:
-        required: false
-        type: string
-      pg_backend_port:
-        required: false
-        type: string
-      pg_backend_database:
-        required: false
-        type: string
+      # pg_backend_host:
+      #   required: false
+      #   type: string
+      # pg_backend_port:
+      #   required: false
+      #   type: string
+      # pg_backend_database:
+      #   required: false
+      #   type: string
       pg_backend_schema:
         required: false
         type: string
@@ -167,6 +167,8 @@ on:
         required: false
 
       #PostGres Backend
+      pg_backend_connection_string:
+        required: false
       pg_backend_username:
         required: false
       pg_backend_password:
@@ -212,9 +214,10 @@ jobs:
       aws_backend_skip_s3_checksum: ${{ inputs.aws_backend_skip_s3_checksum }}
       aws_backend_use_path_style: ${{ inputs.aws_backend_use_path_style }}
       #PostGres Backend
-      pg_backend_host: ${{ inputs.pg_backend_host }}
-      pg_backend_port: ${{ inputs.pg_backend_port }}
-      pg_backend_database: ${{ inputs.pg_backend_database }}
+      # pg_backend_host: ${{ inputs.pg_backend_host }}
+      # pg_backend_port: ${{ inputs.pg_backend_port }}
+      # pg_backend_database: ${{ inputs.pg_backend_database }}
+      pg_backend_connection_string: ${{ secrets.pg_backend_connection_string}}
       pg_backend_schema: ${{ inputs.pg_backend_schema }}
       pg_backend_skip_schema_creation: ${{ inputs.pg_backend_skip_schema_creation }}
       pg_backend_skip_table_creation: ${{ inputs.pg_backend_skip_table_creation }}

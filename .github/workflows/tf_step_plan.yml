@@ -1,6 +1,5 @@
-# step_tf_plan.yml
-# tf_workflow_init_plan_apply.yml
-name: tf_workflow_init_plan_apply
+# tf_step_plan.yml
+name: tf_step_plan
 
 on:
   workflow_call:
@@ -20,7 +19,7 @@ on:
       backend_type:
         required: true
         type: string
-        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+        description: 'Type of the backend to use. Valid values are "azure", "s3" and "pg".'
 
       #Terraform Setup
       terraform_version:
@@ -134,21 +133,18 @@ on:
       aws_secret_key:
         required: false
 
+      #PostGres Backend
+      pg_backend_username:
+        required: false
+      pg_backend_password:
+        required: false
+
       #GitHub PAT
       github_pat:
         required: true
 
 jobs:
-  # $$$$$$$\  $$\                     
-  # $$  __$$\ $$ |                    
-  # $$ |  $$ |$$ | $$$$$$\  $$$$$$$\  
-  # $$$$$$$  |$$ | \____$$\ $$  __$$\ 
-  # $$  ____/ $$ | $$$$$$$ |$$ |  $$ |
-  # $$ |      $$ |$$  __$$ |$$ |  $$ |
-  # $$ |      $$ |\$$$$$$$ |$$ |  $$ |
-  # \__|      \__| \_______|\__|  \__|
-
-  terraform_plan:
+  tf_step_plan:
     runs-on: ${{ inputs.runner }}
     name: Plan Terraform Configuration
     env:
@@ -178,6 +174,12 @@ jobs:
           echo "AWS_REGION=${{ inputs.aws_region }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
+
+      - name: Set PostGres environment variables
+        if: inputs.backend_type == 'pg'
+        run: |
+          echo "PGUSER=${{ secrets.pg_backend_username }}" >> $GITHUB_ENV
+          echo "PGPASSWORD=${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables
         run: |
@@ -221,6 +223,17 @@ jobs:
             -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
             -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
             -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
+
+      - name: Terraform Init with PostGres backend
+        if: inputs.backend_type == 'pg'
+        id: init_pg_backend
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="schema_name=${{ inputs.config_directory }}" \
+            -backend-config="skip_schema_creation=false" \
+            -backend-config="skip_table_creation=false" \
+            -backend-config="skip_index_creation=false"
 
       - name: Terraform Plan
         id: plan

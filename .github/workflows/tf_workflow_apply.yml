@@ -133,6 +133,12 @@ on:
       aws_secret_key:
         required: false
 
+      #PostGres Backend
+      pg_backend_username:
+        required: false
+      pg_backend_password:
+        required: false
+
       #GitHub PAT
       github_pat:
         required: true
@@ -182,5 +188,8 @@ jobs:
       #S3 Backend
       aws_access_key: ${{ secrets.aws_access_key }}
       aws_secret_key: ${{ secrets.aws_secret_key }}
+      #PostGres Backend
+      pg_backend_username: ${{ secrets.pg_backend_username }}
+      pg_backend_password: ${{ secrets.pg_backend_password }}
       #GitHub PAT
       github_pat: ${{ secrets.github_pat }}

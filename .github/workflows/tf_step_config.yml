@@ -1,0 +1,111 @@
+# tf_step_config.yml
+name: tf_step_config
+
+on:
+  workflow_call:
+    inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+        description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
+
+      #Terraform Infra Repository
+      infra_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Infra Repository where HCL code resides.'
+
+      #Terraform Config Repository
+      config_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Config Repository where JSON configurations resides.'
+
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+        description: 'The path to the configuration relative to infra-repo/config, infra-repo/config_override, infra-repo/terraform and config-repo/config directories. The same path should exist at all locations for configurations properly parsed.'
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+        description: 'Either the GitHub username or organization name.'
+
+    secrets:
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  tf_step_config:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout infra repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
+          token: ${{ secrets.github_pat }}
+          path: infra
+
+      - name: Checkout config repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.github_owner }}/${{ inputs.config_repo }}
+          token: ${{ secrets.github_pat }}
+          path: config
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # - name: Install JSON Merge and Validation dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install jsonmerge jsonschema
+
+      - name: Merge and Validate JSON configurations
+        run: |
+          import json
+          import os
+          from jsonmerge import merge
+
+          # Helper function to load and validate JSON configuration
+          def load_json(file_path):
+              try:
+                  with open(file_path, 'r') as f:
+                      return json.load(f)
+              except json.JSONDecodeError as e:
+                  print(f"JSON syntax error in {file_path}: {e}")
+                  exit(1)
+
+          # Paths to JSON files
+          override_path = os.path.join('infra', 'config_override', env['PATHTOSTATE'], '*.json')
+          config_path = os.path.join('config', 'config', env['PATHTOSTATE'], '*.json')
+          default_config_path = os.path.join('config', 'config', env['PATHTOSTATE'], '*.json')
+
+          # Load and validate configurations
+          default_config = load_json(default_config_path) if os.path.exists(default_config_path) else {}
+          config = load_json(config_path) if os.path.exists(config_path) else {}
+          override_config = load_json(override_path) if os.path.exists(override_path) else {}
+
+          # Merge configurations
+          merged_config = merge(merge(default_config, config), override_config)
+
+          # Write terraform.tfvars.json
+          tfvars_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'terraform.tfvars.json')
+          with open(tfvars_path, 'w') as f:
+              json.dump(merged_config, f, indent=2)
+
+          print(f"Terraform variables have been written to {tfvars_path}")
+        shell: python
+
+      - name: Upload terraform.tfvars.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-tfvars
+          path: ${{ github.workspace }}/terraform.tfvars.json

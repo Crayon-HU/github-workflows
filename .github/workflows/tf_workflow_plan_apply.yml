@@ -9,17 +9,31 @@ on:
         required: false
         type: string
         default: 'ubuntu-latest'
+        description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
+
+      #Terraform Infra Repository
+      infra_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Infra Repository where HCL code resides.'
+
+      #Terraform Config Repository
+      config_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Config Repository where JSON configurations resides.'
 
       #Terraform Configuration
       config_directory:
         required: true
         type: string
+        description: 'The path to the configuration relative to infra-repo/config, infra-repo/config_override, infra-repo/terraform and config-repo/config directories. The same path should exist at all locations for configurations properly parsed.'
 
       #Terraform Backend Type
       backend_type:
         required: true
         type: string
-        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+        description: 'Type of the backend to use. Valid values are "azure", "s3" and "pg".'
 
       #Checkov
       checkov_scan:
@@ -102,6 +116,7 @@ on:
       github_owner:
         required: true
         type: string
+        description: 'Either the GitHub username or organization name.'
 
     secrets:
       #Azure
@@ -151,6 +166,29 @@ on:
         required: true
 
 jobs:
+  #   $$$$$$\                       $$$$$$\  $$\           
+  #  $$  __$$\                     $$  __$$\ \__|          
+  #  $$ /  \__| $$$$$$\  $$$$$$$\  $$ /  \__|$$\  $$$$$$\  
+  #  $$ |      $$  __$$\ $$  __$$\ $$$$\     $$ |$$  __$$\ 
+  #  $$ |      $$ /  $$ |$$ |  $$ |$$  _|    $$ |$$ /  $$ |
+  #  $$ |  $$\ $$ |  $$ |$$ |  $$ |$$ |      $$ |$$ |  $$ |
+  #  \$$$$$$  |\$$$$$$  |$$ |  $$ |$$ |      $$ |\$$$$$$$ |
+  #   \______/  \______/ \__|  \__|\__|      \__| \____$$ |
+  #                                              $$\   $$ |
+  #                                              \$$$$$$  |
+  #                                               \______/ 
+
+  tf_workflow_config:
+    uses: ./.github/workflows/tf_step_config.yml
+    with:
+      runner: ${{ inputs.runner }}
+      infra_repo: ${{ inputs.infra_repo }}
+      config_repo: ${{ inputs.config_repo }}
+      config_directory: ${{ inputs.config_directory }}
+      github_owner: ${{ inputs.github_owner }}
+    secrets:
+      github_pat: ${{ secrets.github_pat }}
+
   # $$$$$$$\  $$\                     
   # $$  __$$\ $$ |                    
   # $$ |  $$ |$$ | $$$$$$\  $$$$$$$\  

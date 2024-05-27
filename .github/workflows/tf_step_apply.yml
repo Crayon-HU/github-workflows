@@ -19,7 +19,7 @@ on:
       backend_type:
         required: true
         type: string
-        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+        description: 'Type of the backend to use. Valid values are "azure", "s3" and "pg".'
 
       #Terraform Setup
       terraform_version:

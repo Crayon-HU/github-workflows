@@ -17,11 +17,23 @@ on:
         type: string
         description: 'Name of the Terraform Infra Repository where HCL code resides.'
 
+      infra_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
+
       #Terraform Config Repository
       config_repo:
         required: true
         type: string
         description: 'Name of the Terraform Config Repository where JSON configurations resides.'
+
+      config_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
 
       #Terraform Configuration
       config_directory:
@@ -53,6 +65,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
+          ref: ${{ inputs.infra_repo_ref}}
           token: ${{ secrets.github_pat }}
           path: infra
 
@@ -60,6 +73,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.github_owner }}/${{ inputs.config_repo }}
+          ref: ${{ inputs.config_repo_ref}}
           token: ${{ secrets.github_pat }}
           path: config
 

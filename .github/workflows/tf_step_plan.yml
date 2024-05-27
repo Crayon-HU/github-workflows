@@ -262,7 +262,7 @@ jobs:
             -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
             -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
             -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
-      
+
       - name: Terraform Init with PostGres backend
         if: inputs.backend_type == 'pg'
         id: init_pg_backend

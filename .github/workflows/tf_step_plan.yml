@@ -20,7 +20,7 @@ on:
       backend_type:
         required: true
         type: string
-        description: 'Type of the backend to use. Valid values are "azure" and "s3".'
+        description: 'Type of the backend to use. Valid values are "azure", "s3" and "pg".'
 
       #Terraform Setup
       terraform_version:
@@ -92,6 +92,32 @@ on:
         type: boolean
         default: true
 
+      #PostGres Backend
+      pg_backend_host:
+        required: false
+        type: string
+      pg_backend_port:
+        required: false
+        type: string
+      pg_backend_database:
+        required: false
+        type: string
+      pg_backend_schema_name:
+        required: false
+        type: string
+      pg_backend_skip_schema_creation:
+        required: false
+        type: boolean
+        default: false
+      pg_backend_skip_table_creation:
+        required: false
+        type: boolean
+        default: false
+      pg_backend_skip_index_creation:
+        required: false
+        type: boolean
+        default: false
+
       #GitHub Owner
       github_owner:
         required: true
@@ -132,6 +158,12 @@ on:
       aws_access_key:
         required: false
       aws_secret_key:
+        required: false
+
+      #PostGres Backend
+      pg_backend_username:
+        required: false
+      pg_backend_password:
         required: false
 
       #GitHub PAT
@@ -179,6 +211,15 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${{ secrets.aws_access_key }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.aws_secret_key }}" >> $GITHUB_ENV
 
+      - name: Set PostGres environment variables
+        if: inputs.backend_type == 'pg'
+        run: |
+          echo "PG_HOST=${{ inputs.pg_backend_host }}" >> $GITHUB_ENV
+          echo "PG_PORT=${{ inputs.pg_backend_port }}" >> $GITHUB_ENV
+          echo "PG_USER=${{ secrets.pg_backend_username }}" >> $GITHUB_ENV
+          echo "PG_PASSWORD=${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
+          echo "PG_DBNAME=${{ inputs.pg_backend_database }}" >> $GITHUB_ENV
+
       - name: Set GitHub environment variables
         run: |
           echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
@@ -221,6 +262,17 @@ jobs:
             -backend-config="skip_metadata_api_check=${{ inputs.aws_backend_skip_metadata_api_check }}" \
             -backend-config="skip_s3_checksum=${{ inputs.aws_backend_skip_s3_checksum }}" \
             -backend-config="use_path_style=${{ inputs.aws_backend_use_path_style }}"
+      
+      - name: Terraform Init with PostGres backend
+        if: inputs.backend_type == 'pg'
+        id: init_pg_backend
+        working-directory: ${{ inputs.config_directory }}
+        run: |
+          terraform init \
+            -backend-config="schema_name=${{ inputs.pg_backend_schema_name }}" \
+            -backend-config="skip_schema_creation=${{ inputs.pg_backend_skip_schema_creation }}" \
+            -backend-config="skip_table_creation=${{ inputs.pg_backend_skip_table_creation }}" \
+            -backend-config="skip_index_creation=${{ inputs.pg_backend_skip_index_creation }}" \
 
       - name: Terraform Plan
         id: plan

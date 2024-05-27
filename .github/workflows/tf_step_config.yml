@@ -85,12 +85,12 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install glob jsonmerge
+          pip install jsonmerge
 
       - name: Install JSON Merge and Validation dependencies
         run: |
           python -m pip install --upgrade pip --user
-          python -m pip install glob jsonmerge --user
+          python -m pip install jsonmerge --user
 
       - name: Merge and Validate JSON configurations
         run: |

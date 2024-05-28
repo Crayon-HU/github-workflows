@@ -107,7 +107,7 @@ jobs:
           workspace="${{ github.workspace }}"
           config_directory="${{ inputs.config_directory }}"
 
-          override_directory="${workspace}/infra-repo/config_override/${config_directory}"
+          override_directory="${workspace}/config_override/${config_directory}"
           echo "Listing files in override directory:"
           ls -lha "${override_directory}" || true
 
@@ -115,7 +115,7 @@ jobs:
           echo "Listing files in config config directory:"
           ls -lha "${config_config_directory}" || true
 
-          infra_config_directory="${workspace}/infra-repo/config/${config_directory}"
+          infra_config_directory="${workspace}/config/${config_directory}"
           echo "Listing files in infra config directory:"
           ls -lha "${infra_config_directory}" || true
         shell: bash
@@ -158,9 +158,9 @@ jobs:
               return configs
 
           # Paths to JSON file patterns
-          override_pattern = os.path.join(workspace, 'infra', 'config_override', config_directory, '*.json')
-          config_pattern = os.path.join(workspace, 'config', 'config', config_directory, '*.json')
-          local_pattern = os.path.join(workspace, 'infra', 'config', config_directory, '*.json')
+          override_pattern = os.path.join(workspace, 'config_override', config_directory, '*.json')
+          config_pattern = os.path.join(workspace, 'config-repo', 'config', config_directory, '*.json')
+          local_pattern = os.path.join(workspace, 'config', config_directory, '*.json')
 
           print(f"Override pattern: {override_pattern}")
           print(f"Config pattern: {config_pattern}")

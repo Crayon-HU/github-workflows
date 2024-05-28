@@ -81,11 +81,11 @@ jobs:
 
       - name: Checkout infra repository
         uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
-          ref: ${{ inputs.infra_repo_ref}}
-          token: ${{ secrets.github_pat }}
-          path: infra-repo
+        # with:
+        #   repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
+        #   ref: ${{ inputs.infra_repo_ref}}
+        #   token: ${{ secrets.github_pat }}
+        #   path: infra-repo
 
       - name: Checkout config repository
         uses: actions/checkout@v4

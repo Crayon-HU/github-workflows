@@ -55,6 +55,7 @@ on:
 jobs:
   tf_step_config:
     runs-on: ${{ inputs.runner }}
+    name: Prepare Terraform Configuration
     steps:
       - name: Clean runner workspace
         run: |
@@ -76,7 +77,7 @@ jobs:
 
           echo "Displaying tree structure of the workspace:"
           workspace="${{ github.workspace }}"
-          tree "${workspace}" -L 5 -h
+          tree -a "${workspace}" -L 5 -h
         shell: bash
 
       - name: Checkout infra repository
@@ -99,7 +100,7 @@ jobs:
         run: |
           echo "Displaying tree structure of the workspace:"
           workspace="${{ github.workspace }}"
-          tree "${workspace}" -L 5 -h
+          tree -a "${workspace}" -L 5 -h
         shell: bash
 
       - name: List files in directories

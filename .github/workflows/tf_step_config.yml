@@ -77,6 +77,24 @@ jobs:
           token: ${{ secrets.github_pat }}
           path: config
 
+      - name: List files in directories
+        run: |
+          workspace="${{ github.workspace }}"
+          config_directory="${{ inputs.config_directory }}"
+
+          override_directory="${workspace}/infra/config_override/${config_directory}"
+          echo "Listing JSON files in override directory:"
+          ls -lha "${override_directory}" || true
+
+          config_directory="${workspace}/config/config/${config_directory}"
+          echo "Listing JSON files in config directory:"
+          ls -lha "${config_directory}" || true
+
+          local_directory="${workspace}/infra/config/${config_directory}"
+          echo "Listing JSON files in local directory:"
+          ls -lha "${local_directory}" || true
+        shell: bash
+
       - name: Set up Python
         uses: actions/setup-python@v5
 

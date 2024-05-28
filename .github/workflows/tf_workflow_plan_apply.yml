@@ -195,7 +195,9 @@ jobs:
     with:
       runner: ${{ inputs.runner }}
       infra_repo: ${{ inputs.infra_repo }}
+      infra_repo_ref: ${{ inputs.infra_repo_ref }}
       config_repo: ${{ inputs.config_repo }}
+      config_repo_ref: ${{ inputs.config_repo_ref }}
       config_directory: ${{ inputs.config_directory }}
       github_owner: ${{ inputs.github_owner }}
     secrets:

@@ -58,6 +58,7 @@ jobs:
     steps:
       - name: Clean runner workspace
         run: |
+          shopt -s dotglob
           rm -rf "${GITHUB_WORKSPACE:?}/*"
         shell: bash
 

@@ -68,7 +68,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
           echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
 
-      - name: Install tree and display directory structure
+      - name: Before tree
         run: |
           if ! command -v tree &> /dev/null; then
             sudo apt-get update

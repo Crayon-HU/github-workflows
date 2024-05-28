@@ -212,6 +212,7 @@ jobs:
 
   tf_workflow_plan:
     uses:  ./.github/workflows/tf_step_plan.yml
+    needs: tf_workflow_config
     with:
       runner: ${{ inputs.runner }}
       config_directory: ${{ inputs.config_directory }}

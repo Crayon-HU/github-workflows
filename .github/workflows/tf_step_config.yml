@@ -87,11 +87,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install jsonmerge
 
-      - name: Install JSON Merge and Validation dependencies
-        run: |
-          python -m pip install --upgrade pip --user
-          python -m pip install jsonmerge --user
-
       - name: Merge and Validate JSON configurations
         run: |
           import json
@@ -102,6 +97,7 @@ jobs:
           # Get workflow inputs
           config_directory = '${{ inputs.config_directory }}'
           print(f"Config directory: {config_directory}")
+          workspace = os.getenv('GITHUB_WORKSPACE')
 
           # Helper function to load and validate JSON configuration
           def load_json(pattern):
@@ -119,9 +115,9 @@ jobs:
               return configs
 
           # Paths to JSON file patterns
-          override_pattern = os.path.join('infra', 'config_override', config_directory, '*.json')
-          config_pattern = os.path.join('config', 'config', config_directory, '*.json')
-          local_pattern = os.path.join('infra', 'config', config_directory, '*.json')
+          override_pattern = os.path.join(workspace, 'infra', 'config_override', config_directory, '*.json')
+          config_pattern = os.path.join(workspace, 'config', 'config', config_directory, '*.json')
+          local_pattern = os.path.join(workspace, 'infra', 'config', config_directory, '*.json')
 
           print(f"Override pattern: {override_pattern}")
           print(f"Config pattern: {config_pattern}")

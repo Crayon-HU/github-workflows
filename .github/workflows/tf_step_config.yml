@@ -56,6 +56,11 @@ jobs:
   tf_step_config:
     runs-on: ${{ inputs.runner }}
     steps:
+      - name: Clean runner workspace
+        run: |
+          rm -rf "${GITHUB_WORKSPACE:?}/*"
+        shell: bash
+
       - name: Set GitHub environment variables
         run: |
           echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV

@@ -67,7 +67,7 @@ jobs:
           repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
           ref: ${{ inputs.infra_repo_ref}}
           token: ${{ secrets.github_pat }}
-          path: infra
+          path: infra-repo
 
       - name: Checkout config repository
         uses: actions/checkout@v4
@@ -75,22 +75,34 @@ jobs:
           repository: ${{ inputs.github_owner }}/${{ inputs.config_repo }}
           ref: ${{ inputs.config_repo_ref}}
           token: ${{ secrets.github_pat }}
-          path: config
+          path: config-repo
+
+      - name: Install tree and display directory structure
+        run: |
+          if ! command -v tree &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y tree
+          fi
+
+          echo "Displaying tree structure of the workspace:"
+          workspace="${{ github.workspace }}"
+          tree "${workspace}" -L 3 -h
+        shell: bash
 
       - name: List files in directories
         run: |
           workspace="${{ github.workspace }}"
           config_directory="${{ inputs.config_directory }}"
 
-          override_directory="${workspace}/infra/config_override/${config_directory}"
+          override_directory="${workspace}/infra-repo/config_override/${config_directory}"
           echo "Listing files in override directory:"
           ls -lha "${override_directory}" || true
 
-          config_config_directory="${workspace}/config/config/${config_directory}"
+          config_config_directory="${workspace}/config-repo/config/${config_directory}"
           echo "Listing files in config config directory:"
           ls -lha "${config_config_directory}" || true
 
-          infra_config_directory="${workspace}/infra/config/${config_directory}"
+          infra_config_directory="${workspace}/infra-repo/config/${config_directory}"
           echo "Listing files in infra config directory:"
           ls -lha "${infra_config_directory}" || true
         shell: bash

@@ -83,16 +83,16 @@ jobs:
           config_directory="${{ inputs.config_directory }}"
 
           override_directory="${workspace}/infra/config_override/${config_directory}"
-          echo "Listing JSON files in override directory:"
+          echo "Listing files in override directory:"
           ls -lha "${override_directory}" || true
 
-          config_directory="${workspace}/config/config/${config_directory}"
-          echo "Listing JSON files in config directory:"
-          ls -lha "${config_directory}" || true
+          config_config_directory="${workspace}/config/config/${config_directory}"
+          echo "Listing files in config config directory:"
+          ls -lha "${config_config_directory}" || true
 
-          local_directory="${workspace}/infra/config/${config_directory}"
-          echo "Listing JSON files in local directory:"
-          ls -lha "${local_directory}" || true
+          infra_config_directory="${workspace}/infra/config/${config_directory}"
+          echo "Listing files in infra config directory:"
+          ls -lha "${infra_config_directory}" || true
         shell: bash
 
       - name: Set up Python

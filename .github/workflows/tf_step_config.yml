@@ -86,7 +86,7 @@ jobs:
 
           echo "Displaying tree structure of the workspace:"
           workspace="${{ github.workspace }}"
-          tree "${workspace}" -L 3 -h
+          tree "${workspace}" -L 5 -h
         shell: bash
 
       - name: List files in directories

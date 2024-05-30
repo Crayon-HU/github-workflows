@@ -15,6 +15,11 @@ on:
         required: true
         type: string
 
+      terraform_directory:
+        required: false
+        type: string
+        default: 'terraform'
+
       #Terraform Backend Type
       backend_type:
         required: true
@@ -203,12 +208,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan-file
-          path: terraform/${{ inputs.config_directory }}
+          path: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
 
       - name: Terraform Init with Azure backend
         if: inputs.backend_type == 'azure'
         id: init_backend_azure
-        working-directory: terraform/${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
@@ -219,7 +224,7 @@ jobs:
       - name: Terraform Init with S3 backend
         if: inputs.backend_type == 's3'
         id: init_backend_s3
-        working-directory: terraform/${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
             -backend-config="region=${{ inputs.aws_region }}" \
@@ -233,17 +238,17 @@ jobs:
       - name: Terraform Init with PostGres backend
         if: inputs.backend_type == 'pg'
         id: init_pg_backend
-        working-directory: terraform/${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
-          -backend-config="schema_name=terraform/${{ inputs.config_directory }}" \
+          -backend-config="schema_name=${{ inputs.terraform_directory}}/${{ inputs.config_directory }}" \
           -backend-config="skip_schema_creation=false" \
           -backend-config="skip_table_creation=false" \
           -backend-config="skip_index_creation=false"
 
       - name: Terraform Apply
         id: apply
-        working-directory: terraform/${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform apply -auto-approve "plan_output.tfplan" > apply_output.txt
           apply_output=$(grep '^Apply' apply_output.txt)
@@ -255,7 +260,7 @@ jobs:
         with:
           github-token: ${{ secrets.github_pat }}
           script: |
-            const applyOutput = 'terraform/${{ inputs.config_directory }} - ${{ steps.apply.outputs.stdout }}';
+            const applyOutput = '${{ inputs.terraform_directory}}/${{ inputs.config_directory }} - ${{ steps.apply.outputs.stdout }}';
             if (applyOutput) {
               github.rest.issues.createComment({
                 issue_number: context.issue.number,

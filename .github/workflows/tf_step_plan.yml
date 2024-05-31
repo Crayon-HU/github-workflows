@@ -184,7 +184,7 @@ jobs:
         if: inputs.backend_type == 'pg'
         run: |
           echo "PGUSER=${{ secrets.pg_backend_username }}" >> $GITHUB_ENV
-          echo "PGPASSWORD=${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
+          echo "PGPASSWORD=::add-mask::${{ secrets.pg_backend_password }}" >> $GITHUB_ENV
 
       - name: Set GitHub environment variables
         run: |

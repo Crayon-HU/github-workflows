@@ -11,6 +11,19 @@ on:
         default: 'ubuntu-latest'
         description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
 
+      #Terraform Workflows Repository
+      workflows_repo:
+        required: true
+        type: string
+        default: 'github-workflows'
+        description: 'Name of the Github Workflows Repository where the Python codes resides.'
+
+      workflows_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
+
       #Terraform Infra Repository
       infra_repo:
         required: true
@@ -194,6 +207,8 @@ jobs:
     uses: ./.github/workflows/tf_step_config.yml
     with:
       runner: ${{ inputs.runner }}
+      workflows_repo: ${{ inputs.workflows_repo }}
+      workflows_repo_ref: ${{ inputs.workflows_repo_ref }}
       infra_repo: ${{ inputs.infra_repo }}
       infra_repo_ref: ${{ inputs.infra_repo_ref }}
       config_repo: ${{ inputs.config_repo }}

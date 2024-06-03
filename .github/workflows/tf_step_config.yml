@@ -27,7 +27,7 @@ on:
       workflows_repo_ref:
         required: false
         type: string
-        default: config-step
+        default: main
         description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
 
       #Terraform Infra Repository

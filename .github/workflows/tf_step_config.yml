@@ -11,6 +11,12 @@ on:
         default: 'ubuntu-latest'
         description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
 
+      #Python version
+      python_version:
+        required: false
+        type: string
+        default: '3.11'
+
       #Terraform Workflows Repository
       workflows_repo:
         required: false
@@ -144,12 +150,12 @@ jobs:
 
       - name: Set up a Python virtual environment
         run: |
-          python3.11 --version
+          python${{ inputs.python_version }} --version
 
-          python3 -m pip install --upgrade pip
-          python3 -m pip install python-hcl2
+          python${{ inputs.python_version }} -m pip install --no-cache-dir --upgrade pip
+          python${{ inputs.python_version }} -m pip install --no-cache-dir python-hcl2
 
-          python3.11 -m venv venv
+          python${{ inputs.python_version }} -m venv venv
           source venv/bin/activate
 
           CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py           

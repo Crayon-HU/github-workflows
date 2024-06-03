@@ -155,7 +155,7 @@ jobs:
 
       - name: Merge and Validate JSON configurations
         run: |
-          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${workspace}/workflows-repo/scripts/merge-configs.py 
+          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py 
 
       - name: Upload terraform.tfvars.json as artifact
         uses: actions/upload-artifact@v4

@@ -212,7 +212,7 @@ jobs:
           configs_for_tfvars = load_tfvars(config_pattern_for_tfvars)
           override_configs_for_tfvars = load_tfvars(override_pattern_for_tfvars)
 
-          local configs = local_configs_for_json + local_configs_for_tfvars
+          local_configs = local_configs_for_json + local_configs_for_tfvars
           configs = configs_for_json + configs_for_tfvars
           override_configs = override_configs_for_json + override_configs_for_tfvars
 

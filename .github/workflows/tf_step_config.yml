@@ -121,16 +121,12 @@ jobs:
           ls -lha "${infra_config_directory}" || true
         shell: bash
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-
       - name: Set up a Python virtual environment
         run: |
-          python3 --version
           python3.11 --version
 
-          python3 -m pip install --upgrade pip
-          python3 -m pip install python-hcl2
+          python3.11 -m pip install --upgrade pip
+          python3.11 -m pip install python-hcl2
 
           python3.11 -m venv venv
           source venv/bin/activate

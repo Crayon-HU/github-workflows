@@ -130,9 +130,11 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install jsonmerge
+          pip install python-hcl2
 
       - name: Merge and Validate JSON configurations
         run: |
+          import hcl2
           import json
           import os
           import collections.abc
@@ -159,6 +161,21 @@ jobs:
                       exit(1)
               return configs
 
+          # Helper function to load tfvars configuration
+          def load_tfvars(pattern):
+              configs = []
+              for file_path in glob(pattern, recursive=True):
+                  print(f"Found tfvars file: {file_path}")
+                  try:
+                      with open(file_path, 'r') as f:
+                          config = hcl2.load(f)
+                          configs.append(config)
+                          print(f"Loaded tfvars configuration from {file_path}: {config}")
+                  except Exception as e:
+                      print(e.message)
+                      exit(1)
+              return configs
+
           def deep_update(d, u):
             for k, v in u.items():
                 if isinstance(v, collections.abc.Mapping):
@@ -177,9 +194,27 @@ jobs:
           print(f"Local pattern: {local_pattern}")
 
           # Load and validate configurations
-          local_configs = load_json(local_pattern)
-          configs = load_json(config_pattern)
-          override_configs = load_json(override_pattern)
+          local_configs_for_json = load_json(local_pattern)
+          configs_for_json = load_json(config_pattern)
+          override_configs_for_json = load_json(override_pattern)
+
+          # Paths to tfvars file patterns
+          override_pattern_for_tfvars = os.path.join(workspace, 'config_override', config_directory, '*.tfvars')
+          config_pattern_for_tfvars = os.path.join(workspace, 'config-repo', 'config', config_directory, '*.tfvars')
+          local_pattern_for_tfvars = os.path.join(workspace, 'config', config_directory, '*.tfvars')
+
+          print(f"Override pattern for tfvars: {override_pattern_for_tfvars}")
+          print(f"Config pattern for tfvars: {config_pattern_for_tfvars}")
+          print(f"Local pattern for tfvars: {local_pattern_for_tfvars}")
+
+          # Load and validate configurations
+          local_configs_for_tfvars = load_tfvars(local_pattern_for_tfvars)
+          configs_for_tfvars = load_tfvars(config_pattern_for_tfvars)
+          override_configs_for_tfvars = load_tfvars(override_pattern_for_tfvars)
+
+          local configs = local_configs_for_json + local_configs_for_tfvars
+          configs = configs_for_json + configs_for_tfvars
+          override_configs = override_configs_for_json + override_configs_for_tfvars
 
           # Merge configurations
           merged_config = {}

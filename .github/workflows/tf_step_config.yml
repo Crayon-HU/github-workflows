@@ -129,7 +129,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install python-hcl2
+          python -m pip install python-hcl2
 
       - name: Merge and Validate JSON configurations
         run: |

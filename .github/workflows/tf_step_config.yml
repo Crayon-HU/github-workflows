@@ -155,13 +155,9 @@ jobs:
           python${{ inputs.python_version }} -m venv venv
           source venv/bin/activate
 
-          # python${{ inputs.python_version }} -m ensurepip --upgrade
-          # python3 -m pip install --no-cache-dir --upgrade pip
-          # python${{ inputs.python_version }} -m pip install --no-cache-dir python-hcl2 --target venv/Lib/site-packages
           pip install --no-cache-dir --upgrade pip
           pip install --no-cache-dir python-hcl2
 
-          # CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py
           CONFIG_DIRECTORY='${{ inputs.config_directory }}' python merge-configs.py
         shell: /usr/bin/bash -e {0}
         working-directory: ${{ github.workspace }}/workflows-repo/scripts

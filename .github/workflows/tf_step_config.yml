@@ -126,10 +126,15 @@ jobs:
 
       - name: Set up a Python virtual environment
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python3 --version
+          python3.11 --version
+
           python3 -m pip install --upgrade pip
           python3 -m pip install python-hcl2
+
+          python3.11 -m venv venv
+          source venv/bin/activate
+
 
       - name: Merge and Validate JSON configurations
         run: |

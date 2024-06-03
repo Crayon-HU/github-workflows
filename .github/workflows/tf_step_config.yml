@@ -147,15 +147,12 @@ jobs:
           python3.11 --version
 
           python3 -m pip install --upgrade pip
-          python3 -m pip install python-hcl2
+          python3 -m pip install python-hcl2 --target 
 
           python3.11 -m venv venv
           source venv/bin/activate
 
-
-      - name: Merge and Validate JSON configurations
-        run: |
-          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py 
+          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py           
 
       - name: Upload terraform.tfvars.json as artifact
         uses: actions/upload-artifact@v4

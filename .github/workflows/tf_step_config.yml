@@ -129,17 +129,15 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install jsonmerge
           pip install python-hcl2
 
       - name: Merge and Validate JSON configurations
         run: |
-          import hcl2
           import json
           import os
           import collections.abc
           from glob import glob
-          from jsonmerge import merge
+          from python-hcl2 import hcl2
 
           # Get workflow inputs
           config_directory = '${{ inputs.config_directory }}'

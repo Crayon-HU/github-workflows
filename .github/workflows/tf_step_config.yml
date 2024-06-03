@@ -137,7 +137,7 @@ jobs:
           import os
           import collections.abc
           from glob import glob
-          from python-hcl2 import hcl2
+          import hcl2
 
           # Get workflow inputs
           config_directory = '${{ inputs.config_directory }}'

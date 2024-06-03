@@ -41,12 +41,12 @@ def load_tfvars(pattern):
     return configs
 
 def deep_update(d, u):
-for k, v in u.items():
-    if isinstance(v, collections.abc.Mapping):
-        d[k] = deep_update(d.get(k, {}), v)
-    else:
-        d[k] = v
-return d
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = deep_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
 
 # Paths to JSON file patterns
 override_pattern = os.path.join(workspace, 'config_override', config_directory, '*.json')

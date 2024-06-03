@@ -11,19 +11,6 @@ on:
         default: 'ubuntu-latest'
         description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
 
-      #Terraform Workflows Repository
-      workflows_repo:
-        required: false
-        type: string
-        default: 'github-workflows'
-        description: 'Name of the Github Workflows Repository where the Python codes resides.'
-
-      workflows_repo_ref:
-        required: false
-        type: string
-        default: config-step
-        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
-
       #Terraform Infra Repository
       infra_repo:
         required: true

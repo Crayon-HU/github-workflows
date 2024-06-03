@@ -152,7 +152,7 @@ jobs:
         run: |
           python${{ inputs.python_version }} --version
 
-          python${{ inputs.python_version }} -m pip install --no-cache-dir --upgrade pip
+          python3 -m pip install --no-cache-dir --upgrade pip
           python${{ inputs.python_version }} -m pip install --no-cache-dir python-hcl2
 
           python${{ inputs.python_version }} -m venv venv

@@ -152,6 +152,8 @@ jobs:
   tf_step_apply:
     runs-on: ${{ inputs.runner }}
     name: Apply Terraform Configuration
+    environment:
+      name: default
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
       TF_VAR_USER_OCID: ${{ secrets.oci_user }}

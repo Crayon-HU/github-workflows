@@ -296,6 +296,8 @@ jobs:
   #           \__|      \__|           \______/ 
 
   tf_workflow_apply:
+    needs: [tf_workflow_plan, checkov_scan]
+    if: ${{ always() && (needs.checkov_scan.result == 'success' || !inputs.checkov_scan) }}
     uses:  ./.github/workflows/tf_step_apply.yml
     with:
       runner: ${{ inputs.runner }}
@@ -344,5 +346,4 @@ jobs:
       pg_backend_password: ${{ secrets.pg_backend_password }}
       #GitHub PAT
       github_pat: ${{ secrets.github_pat }}
-    needs: [tf_workflow_plan, checkov_scan]
-    if: ${{ always() && (needs.checkov_scan.result == 'success' || !inputs.checkov_scan) }}
+    

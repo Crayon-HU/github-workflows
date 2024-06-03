@@ -15,6 +15,11 @@ on:
         required: true
         type: string
 
+      terraform_directory:
+        required: false
+        type: string
+        default: 'terraform'
+
       #Terraform Backend Type
       backend_type:
         required: true
@@ -202,7 +207,7 @@ jobs:
       - name: Terraform Init with Azure backend
         if: inputs.backend_type == 'azure'
         id: init_azure_backend
-        working-directory: ${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ secrets.azure_backend_resource_group }}" \
@@ -213,7 +218,7 @@ jobs:
       - name: Terraform Init with S3 backend
         if: inputs.backend_type == 's3'
         id: init_s3_backend
-        working-directory: ${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
             -backend-config="region=${{ inputs.aws_region }}" \
@@ -227,23 +232,29 @@ jobs:
       - name: Terraform Init with PostGres backend
         if: inputs.backend_type == 'pg'
         id: init_pg_backend
-        working-directory: ${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform init \
-            -backend-config="schema_name=${{ inputs.config_directory }}" \
+            -backend-config="schema_name=${{ inputs.terraform_directory}}/${{ inputs.config_directory }}" \
             -backend-config="skip_schema_creation=false" \
             -backend-config="skip_table_creation=false" \
             -backend-config="skip_index_creation=false"
 
+      - name: Download Variables File
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-tfvars
+          path: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
+
       - name: Terraform Plan
         id: plan
-        working-directory: ${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform plan -no-color -out=plan_output.tfplan | tee plan_output.txt
 
       - name: Convert Plan to JSON
         id: plan_to_json
-        working-directory: ${{ inputs.config_directory }}
+        working-directory: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}
         run: |
           terraform show -json plan_output.tfplan > plan_output.json
 
@@ -251,13 +262,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-json
-          path: ${{ inputs.config_directory }}/plan_output.json
+          path: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}/plan_output.json
 
       - name: Upload Plan File
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-file
-          path: ${{ inputs.config_directory }}/plan_output.tfplan
+          path: ${{ inputs.terraform_directory}}/${{ inputs.config_directory }}/plan_output.tfplan
 
       - name: Comment Plan Output
         if: success()
@@ -266,10 +277,10 @@ jobs:
           github-token: ${{ secrets.github_pat }}
           script: |
             const fs = require('fs');
-            const planOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.config_directory }}/plan_output.txt', 'utf8');
+            const planOutput = fs.readFileSync('${{ github.workspace }}/${{ inputs.terraform_directory}}/${{ inputs.config_directory }}/plan_output.txt', 'utf8');
             const output = `
               <details>
-              <summary>${{ inputs.config_directory }} - Terraform Plan Output (click to expand)</summary>
+              <summary>${{ inputs.terraform_directory}}/${{ inputs.config_directory }} - Terraform Plan Output (click to expand)</summary>
               \n\`\`\`\n${planOutput}\n\`\`\`
               </details>
             `;

@@ -1,0 +1,169 @@
+# tf_step_config.yml
+name: tf_step_config
+
+on:
+  workflow_call:
+    inputs:
+      #Runner
+      runner:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+        description: 'Either the type of runner or the label of the self hosted runner to be used. Defaults to ubuntu-latest.'
+
+      #Python version
+      python_version:
+        required: false
+        type: string
+        default: '3.11'
+
+      #Terraform Workflows Repository
+      workflows_repo:
+        required: false
+        type: string
+        default: 'github-workflows'
+        description: 'Name of the Github Workflows Repository where the Python codes resides.'
+
+      workflows_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
+
+      #Terraform Infra Repository
+      infra_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Infra Repository where HCL code resides.'
+
+      infra_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
+
+      #Terraform Config Repository
+      config_repo:
+        required: true
+        type: string
+        description: 'Name of the Terraform Config Repository where JSON configurations resides.'
+
+      config_repo_ref:
+        required: false
+        type: string
+        default: main
+        description: 'The branch, tag or commit SHA to checkout. Defaults to main.'
+
+      #Terraform Configuration
+      config_directory:
+        required: true
+        type: string
+        description: 'The path to the configuration relative to infra-repo/config, infra-repo/config_override, infra-repo/terraform and config-repo/config directories. The same path should exist at all locations for configurations properly parsed.'
+
+      #GitHub Owner
+      github_owner:
+        required: true
+        type: string
+        description: 'Either the GitHub username or organization name.'
+
+    secrets:
+      #GitHub PAT
+      github_pat:
+        required: true
+
+jobs:
+  tf_step_config:
+    runs-on: ${{ inputs.runner }}
+    name: Prepare Terraform Configuration
+    steps:
+      - name: Clean runner workspace
+        run: |
+          shopt -s dotglob
+          rm -rf "${GITHUB_WORKSPACE:?}/*"
+        shell: bash
+
+      - name: Set GitHub environment variables
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.github_pat }}" >> $GITHUB_ENV
+          echo "GITHUB_OWNER=${{ inputs.github_owner }}" >> $GITHUB_ENV
+
+      - name: Before tree
+        run: |
+          if ! command -v tree &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y tree
+          fi
+
+          echo "Displaying tree structure of the workspace:"
+          workspace="${{ github.workspace }}"
+          tree -a "${workspace}" -L 5 -h
+        shell: bash
+
+      - name: Checkout infra repository
+        uses: actions/checkout@v4
+        # with:
+        #   repository: ${{ inputs.github_owner }}/${{ inputs.infra_repo }}
+        #   ref: ${{ inputs.infra_repo_ref}}
+        #   token: ${{ secrets.github_pat }}
+        #   path: infra-repo
+
+      - name: Checkout workflows repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.github_owner }}/${{ inputs.workflows_repo }}
+          ref: ${{ inputs.workflows_repo_ref}}
+          token: ${{ secrets.github_pat }}
+          path: workflows-repo
+
+      - name: Checkout config repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.github_owner }}/${{ inputs.config_repo }}
+          ref: ${{ inputs.config_repo_ref}}
+          token: ${{ secrets.github_pat }}
+          path: config-repo
+
+      - name: After tree
+        run: |
+          echo "Displaying tree structure of the workspace:"
+          workspace="${{ github.workspace }}"
+          tree -a "${workspace}" -L 5 -h
+        shell: bash
+
+      - name: List files in directories
+        run: |
+          workspace="${{ github.workspace }}"
+          config_directory="${{ inputs.config_directory }}"
+
+          override_directory="${workspace}/config_override/${config_directory}"
+          echo "Listing files in override directory:"
+          ls -lha "${override_directory}" || true
+
+          config_config_directory="${workspace}/config-repo/config/${config_directory}"
+          echo "Listing files in config config directory:"
+          ls -lha "${config_config_directory}" || true
+
+          infra_config_directory="${workspace}/config/${config_directory}"
+          echo "Listing files in infra config directory:"
+          ls -lha "${infra_config_directory}" || true
+        shell: bash
+
+      - name: Set up a Python virtual environment
+        run: |
+          python${{ inputs.python_version }} --version
+
+          python${{ inputs.python_version }} -m venv venv
+          source venv/bin/activate
+
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir python-hcl2
+
+          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python merge-configs.py
+        shell: /usr/bin/bash -e {0}
+        working-directory: ${{ github.workspace }}/workflows-repo/scripts
+
+      - name: Upload terraform.tfvars.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-tfvars
+          path: ${{ github.workspace }}/terraform.tfvars.json

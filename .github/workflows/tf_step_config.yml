@@ -159,7 +159,9 @@ jobs:
           python${{ inputs.python_version }} -m venv venv
           source venv/bin/activate
 
-          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py           
+          CONFIG_DIRECTORY='${{ inputs.config_directory }}' python3.11 ${{ github.workspace }}/workflows-repo/scripts/merge-configs.py
+        shell: /usr/bin/bash -e {0}
+        working-directory: ${{ github.workspace }}/workflows-repo/scripts
 
       - name: Upload terraform.tfvars.json as artifact
         uses: actions/upload-artifact@v4

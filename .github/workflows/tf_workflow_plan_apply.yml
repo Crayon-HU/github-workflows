@@ -194,8 +194,6 @@ jobs:
     uses: ./.github/workflows/tf_step_config.yml
     with:
       runner: ${{ inputs.runner }}
-      workflows_repo: ${{ inputs.workflows_repo }}
-      workflows_repo_ref: ${{ inputs.workflows_repo_ref }}
       infra_repo: ${{ inputs.infra_repo }}
       infra_repo_ref: ${{ inputs.infra_repo_ref }}
       config_repo: ${{ inputs.config_repo }}

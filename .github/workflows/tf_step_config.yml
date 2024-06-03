@@ -147,7 +147,7 @@ jobs:
           python3.11 --version
 
           python3 -m pip install --upgrade pip
-          python3 -m pip install python-hcl2 --target 
+          python3 -m pip install python-hcl2
 
           python3.11 -m venv venv
           source venv/bin/activate

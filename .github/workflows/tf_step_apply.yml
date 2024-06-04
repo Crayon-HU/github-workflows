@@ -101,6 +101,11 @@ on:
         required: true
         type: string
 
+      github_env:
+        required: false
+        type: string
+        default: default
+
     secrets:
       #Azure
       azure_tenant_id:
@@ -153,7 +158,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Apply Terraform Configuration
     environment:
-      name: default
+      name: ${{ inputs.github_env }}
     env:
       TF_VAR_TENANCY_OCID: ${{ secrets.oci_tenancy }}
       TF_VAR_USER_OCID: ${{ secrets.oci_user }}
